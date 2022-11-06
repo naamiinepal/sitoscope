@@ -148,4 +148,4 @@ MESSAGE_TAGS = {
 }
 
 # CSRF
-CSRF_COOKIE_DOMAIN = ".naamii.org.np"
+CSRF_TRUSTED_ORIGINS = ["https://sitoscope.naamii.org.np"]
