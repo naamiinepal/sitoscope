@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-@pjde$j5eywe8h*(nyo0@0ny6jio8_(7b23so9r*&g8)dj&t_6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1", "192.168.1.73"]
 
 
 # Application definition
@@ -146,3 +146,6 @@ MESSAGE_TAGS = {
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
 }
+
+# CSRF
+CSRF_COOKIE_DOMAIN = ".naamii.org.np"
