@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Diarrhea Symptoms
+{% endblock %}
+
+{% block body %}
+
+<h1>Diarrhea Symptoms</h1>
+    {% if symptoms %}
+        <ul>
+        {% for symptom in symptoms %}
+            <li>{{ symptom.name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No symptoms available.</p>
+    {% endif %}
+    <a href="{% url 'sample:symptom_form' %}">Add New</a>
+{% endblock %}

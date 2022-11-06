@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+Login
+{% endblock title %}
+
+{% block body %}
+<div class="d-flex justify-content-center align-items-center vh-100" style="background:linear-gradient( rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2) ), url('https://thumbs.dreamstime.com/b/dna-helix-scientific-research-genome-decoding-medical-innovation-d-illustration-molecule-under-microscope-203548400.jpg'); background-size: contain;
+">
+	<div class="card shadow p-3 mb-5 bg-white rounded">
+		<div class="card-header">
+			<h3 style="color:#008000;">Login</h3>
+		</div>
+		<div class="card-body">
+			<form action="{% url 'user:login' %}" method="post">
+				{% csrf_token %}
+				{{ form|crispy }}
+				<button class="btn btn-success mt-1" type="submit">Login</button>
+			</form>
+		</div>
+		<div class="card-footer">
+			<div class="d-flex justify-content-center mt-2">
+				<div id="liveAlertPlaceholder"></div>
+                <a class="alert-link" id="liveAlertBtn">Forgot Password?</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock body %}
