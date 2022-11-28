@@ -13,8 +13,6 @@ from address.models import Municipality
 
 
 # Create your models here.
-
-
 class Sample(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -70,6 +68,9 @@ class Water(Sample):
 
     type = models.CharField(max_length=2, choices=WATER_TYPE_CHOICES)
     use = models.CharField(max_length=200, null=True)
+    ward = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(32)]
+    )
 
     class Meta:
         verbose_name = "water"
@@ -98,6 +99,9 @@ class Vegetable(Sample):
     Model to describe vegetable sample.
     """
 
+    ward = models.PositiveSmallIntegerField(
+        default=1, validators=[MinValueValidator(1), MaxValueValidator(32)]
+    )
     name = models.CharField(max_length=2, choices=VEGETABLE_CHOICES)
     origin = models.CharField(max_length=200, null=True)
 

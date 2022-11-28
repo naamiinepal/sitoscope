@@ -1,6 +1,6 @@
 from django.urls import path, include
 from sample import views
-from sample.sample_views import standard_sample_views
+from sample.sample_views import standard_sample_views, water_sample_views
 from rest_framework.routers import DefaultRouter
 
 # Create a router and register our viewsets with it.
@@ -34,5 +34,25 @@ urlpatterns = [
         "standard-samples/<str:sample_id>/<int:slide_number>/<str:image_type>",
         standard_sample_views.standard_slide_image_details,
         name="standard_slide_image",
+    ),
+    path(
+        "water-samples/",
+        water_sample_views.water_home,
+        name="water_samples_home",
+    ),
+    path(
+        "water-samples/new/",
+        water_sample_views.get_water_form,
+        name="add_water_sample",
+    ),
+    path(
+        "water-samples/<str:sample_id>/",
+        water_sample_views.water_sample_detail,
+        name="water_sample_detail",
+    ),
+    path(
+        "water-samples/<str:sample_id>/<int:slide_number>/<str:image_type>",
+        water_sample_views.water_slide_image_details,
+        name="water_slide_image",
     ),
 ]
