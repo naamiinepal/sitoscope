@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<h5 class="text-center">{{ standard_sample }}</h5>
+<div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <div class="text-success">
+            <hr>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
+
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Date of collection</td>
+            <th scope="row">{{ standard_sample.date_of_collection }}</th>
+        </tr>
+        <tr>
+            <td>Matrix</td>
+            <th scope="row">{{ standard_sample.matrix }}</th>
+        </tr>
+        <tr>
+            <td>Dilution Factor</td>
+            <th scope="row">{{ standard_sample.dilution_factor | floatformat:"4" }}</th>
+        </tr>
+        <tr>
+            <td>Expected Concentration</td>
+            <th scope="row">{{ standard_sample.expected_concentration | floatformat:"4" }}</th>
+        </tr>
+        <tr>
+            <td>Observed Concentration</td>
+            <th scope="row">{{ standard_sample.observed_concentration | floatformat:"4" }}</th>
+        </tr>
+    </tbody>
+</table>
+
+{% if slides %}
+{% for slide in slides %}
+<table class="table mt-2 table-borderless">
+    <thead class="table-light">
+        <tr>
+            <th scope="col">Slide {{ forloop.counter}}</th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="text-primary">
+            <td>
+                <a class="link-primary"
+                    href="{% url 'sample:standard_slide_image' sample_id=standard_sample.sample_id slide_number=slide.slide_number image_type='smartphone' %}">Smartphone</a>
+            </td>
+            <td>{{ slide.smartphone_images_count }}/15</td>
+        </tr>
+        <tr class="text-success">
+            <td>
+                <a href="{% url 'sample:standard_slide_image' sample_id=standard_sample.sample_id slide_number=slide.slide_number image_type='brightfield' %}"
+                    class="link-success">Brightfield</a>
+            </td>
+            <td>{{ slide.brightfield_images_count }}/15</td>
+        </tr>
+    </tbody>
+</table>
+{% endfor %}
+{% endif %}
+
+{% endblock %}
