@@ -8,9 +8,6 @@ class WaterForm(ModelForm):
         model = Water
         fields = [
             "date_of_collection",
-            "site",
-            "ward",
-            "locality",
             "site_image",
             "type",
             "use",

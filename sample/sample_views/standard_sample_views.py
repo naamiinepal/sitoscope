@@ -11,7 +11,7 @@ from django.core.files.images import ImageFile
 from django.contrib import messages
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-import uuid
+import nanoid
 
 
 # Create your views here
@@ -23,7 +23,9 @@ def standard_home(request: HttpRequest):
 
 def create_standard_sample_id(date):
     # Utility to create standard sample id
-    sample_number = str(uuid.uuid4())[:5]
+    sample_number = nanoid.generate(
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 5
+    )
     return f"Standard_{date.strftime('%Y%m%d')}_{sample_number}"
 
 

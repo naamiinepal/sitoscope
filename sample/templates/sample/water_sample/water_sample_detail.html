@@ -1,91 +1,49 @@
-{% extends 'base.html' %}
+{% extends 'sample/sample_detail.html' %}
 
-{% block body %}
-
-<h5 class="text-center">{{ water_sample }}</h5>
-<div class="row">
-    <div class="col"></div>
-    <div class="col">
-        <div class="text-success">
-            <hr>
-        </div>
-    </div>
-    <div class="col"></div>
-</div>
-
+{% block sample_detail %}
 <table class="table">
     <tbody>
         <tr>
             <td>Date of collection</td>
-            <th scope="row">{{ water_sample.date_of_collection }}</th>
+            <th scope="row">{{ sample.date_of_collection }}</th>
         </tr>
         <tr>
             <td>Province</td>
-            <th scope="row">{{ water_sample.site.district.province.name }}</th>
+            <th scope="row">{{ sample.site.district.province.name }}</th>
         </tr>
         <tr>
             <td>District</td>
-            <th scope="row">{{ water_sample.site.district.name }}</th>
+            <th scope="row">{{ sample.site.district.name }}</th>
         </tr>
         <tr>
             <td>Municipality/GaunPalika</td>
-            <th scope="row">{{ water_sample.site.name }}</th>
+            <th scope="row">{{ sample.site.name }}</th>
         </tr>
         <tr>
             <td>Ward</td>
-            <th scope="row">{{ water_sample.ward }}</th>
+            <th scope="row">{{ sample.ward }}</th>
         </tr>
         <tr>
             <td>Locality</td>
-            <th scope="row">{{ water_sample.locality }}</th>
+            <th scope="row">{{ sample.locality }}</th>
         </tr>
         <tr>
             <td>Water Type</td>
-            <th scope="row">{{ water_sample.get_type_display }}</th>
+            <th scope="row">{{ sample.get_type_display }}</th>
         </tr>
         <tr>
             <td>Water Use</td>
-            <th scope="row">{{ water_sample.use }}</th>
+            <th scope="row">{{ sample.use }}</th>
         </tr>
         <tr>
             <td>Site Image</td>
             <th scope="row">
                 <figure class="figure">
-                    <img src="{{ water_sample.site_image.url }}" class="figure-img img-thumbnail rounded"
-                        alt="site image">
+                    <img src="{{ sample.site_image.url }}" class="figure-img img-thumbnail rounded" alt="site image">
                 </figure>
             </th>
         </tr>
     </tbody>
 </table>
-
-{% if slides %}
-{% for slide in slides %}
-<table class="table mt-2 table-borderless">
-    <thead class="table-light">
-        <tr>
-            <th scope="col">Slide {{ forloop.counter}}</th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr class="text-primary">
-            <td>
-                <a class="link-primary"
-                    href="{% url 'sample:water_slide_image' sample_id=water_sample.sample_id slide_number=slide.slide_number image_type='smartphone' %}">Smartphone</a>
-            </td>
-            <td>{{ slide.smartphone_images_count }}/15</td>
-        </tr>
-        <tr class="text-success">
-            <td>
-                <a href="{% url 'sample:water_slide_image' sample_id=water_sample.sample_id slide_number=slide.slide_number image_type='brightfield' %}"
-                    class="link-success">Brightfield</a>
-            </td>
-            <td>{{ slide.brightfield_images_count }}/15</td>
-        </tr>
-    </tbody>
-</table>
-{% endfor %}
-{% endif %}
 
 {% endblock %}

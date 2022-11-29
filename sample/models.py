@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from datetime import date
 from django.core.validators import MinValueValidator, MaxValueValidator
-import os
 from sample.const import (
     GENDER_CHOICES,
     VEGETABLE_CHOICES,
@@ -10,6 +9,7 @@ from sample.const import (
     IMAGE_TYPE_CHOICES,
 )
 from address.models import Municipality
+from sample.utils import upload_samples
 
 
 # Create your models here.
@@ -178,39 +178,6 @@ class Slide(models.Model):
             return f"Slide {self.slide_number} for {self.standard_sample}"
 
 
-def upload_samples(instance, filename):
-    slide_number = instance.slide.slide_number
-    image_number = instance.image_id
-    if instance.slide.standard_sample:
-        sample_type = "standard"
-        date = instance.slide.standard_sample.date_of_collection
-        sample_id = instance.slide.standard_sample.sample_id
-        filename = f"{sample_type}/{date}/{sample_id}/{slide_number}/{image_number}.jpg"
-    else:
-        if instance.slide.water_sample:
-            sample_type = "water"
-            site = instance.slide.water_sample.site
-            date = instance.slide.water_sample.date_of_collection
-            sample_id = instance.slide.water_sample.sample_id
-        elif instance.slide.stool_sample:
-            sample_type = "stool"
-            site = instance.slide.stool_sample.site
-            date = instance.slide.stool_sample.date_of_collection
-            sample_id = instance.slide.stool_sample.sample_id
-        else:
-            sample_type = "vegetable"
-            site = instance.slide.vegetable_sample.site
-            date = instance.slide.vegetable_sample.date_of_collection
-            sample_id = instance.slide.vegetable_sample.sample_id
-        filename = (
-            f"{sample_type}/{site}/{date}/{sample_id}/{slide_number}/{image_number}.jpg"
-        )
-    fullname = os.path.join(settings.MEDIA_ROOT, filename)
-    if os.path.exists(fullname):
-        os.remove(fullname)
-    return filename
-
-
 class SlideImage(models.Model):
     """
     Model to describe slide images.
@@ -226,7 +193,7 @@ class SlideImage(models.Model):
         Slide, related_name="slide_image", on_delete=models.PROTECT, default=None
     )
     image = models.ImageField(
-        upload_to=upload_samples,  # TODO: Change this
+        upload_to=upload_samples,
         verbose_name="Slide Image",
     )
     image_id = models.CharField(max_length=100, unique=True)

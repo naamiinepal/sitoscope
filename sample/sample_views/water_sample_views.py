@@ -1,43 +1,51 @@
-from django.shortcuts import render, redirect
-from sample.models import Water, Slide, SlideImage
+import nanoid
 
-from sample.const import IMAGE_TYPE_CHOICES, SLIDE_COUNT, IMAGE_COUNT
-from django.http import HttpRequest, Http404
-from django.contrib.auth.decorators import login_required
-from sample.forms.water_sample_forms import WaterForm
-from sample.forms.standard_sample_form import SlideImagesForm
-
-from django.core.files.images import ImageFile
 from django.contrib import messages
-
-from django.shortcuts import get_object_or_404
-
+from django.contrib.auth.decorators import login_required
+from django.core.files.images import ImageFile
 from django.db.models import Q
-import uuid
+from django.http import Http404, HttpRequest
+from django.shortcuts import get_object_or_404, redirect, render
+
+from address.forms import AddressForm
+from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
+from sample.forms.standard_sample_form import SlideImagesForm
+from sample.forms.water_sample_forms import WaterForm
+from sample.models import Slide, SlideImage, Water
 
 
 # Create your views here
 @login_required
 def water_home(request: HttpRequest):
     latest_samples_list = Water.objects.order_by("-id")[:5]
-    context = {"latest_samples_list": latest_samples_list}
-    return render(request, "sample/water_sample/water_sample_home.html", context)
+    context = {"latest_samples_list": latest_samples_list, "sample_type": "water"}
+    return render(request, "sample/sample_home.html", context)
 
 
 def create_water_sample_id(date, municipality):
     # Utility to create water sample id
     site = f"{municipality.district.province.code}-{municipality.name}"
-    sample_number = str(uuid.uuid4())[:5]
+    sample_number = nanoid.generate(
+        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 5
+    )
     return f"W_{site}_{date.strftime('%Y%m%d')}_{sample_number}"
 
 
 @login_required
 def get_water_form(request):
+    address_form = AddressForm(request.POST or None)
     if request.method == "POST":
-        form = WaterForm(request.POST, request.FILES)
-        if form.is_valid():
-            validated_data = form.cleaned_data
+        sample_form = WaterForm(request.POST, request.FILES)
+        if sample_form.is_valid() and address_form.is_valid():
+            validated_data = sample_form.cleaned_data
             validated_data.update({"user": request.user})
+            validated_data.update(
+                {
+                    "site": address_form.cleaned_data.get("municipality"),
+                    "ward": address_form.cleaned_data.get("ward"),
+                    "locality": address_form.cleaned_data.get("locality"),
+                }
+            )
             validated_data.update(
                 {
                     "sample_id": create_water_sample_id(
@@ -70,9 +78,13 @@ def get_water_form(request):
             return redirect("sample:water_samples_home")
 
     else:
-        form = WaterForm()
+        sample_form = WaterForm()
 
-    return render(request, "sample/water_sample/water_sample_form.html", {"form": form})
+    return render(
+        request,
+        "sample/water_sample/water_sample_form.html",
+        {"sample_form": sample_form, "address_form": address_form},
+    )
 
 
 @login_required
@@ -88,7 +100,7 @@ def water_sample_detail(request, sample_id=None):
         ).count()
         slide.smartphone_images_count = smartphone_images_count
         slide.brightfield_images_count = brightfield_images_count
-    context = {"water_sample": water_sample, "slides": slides}
+    context = {"sample": water_sample, "slides": slides, "sample_type": "water"}
 
     return render(request, "sample/water_sample/water_sample_detail.html", context)
 
@@ -148,7 +160,8 @@ def water_slide_image_details(
         "form": form,
         "images": db_images,
         "show_form": show_form,
+        "sample_type": "water",
     }
     return render(
-        request, "sample/water_sample/water_slide_image_upload_form.html", context
+        request, "sample/slide_image_upload_form.html", context
     )
