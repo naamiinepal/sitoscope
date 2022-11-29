@@ -6,10 +6,10 @@ from sample.sample_views import standard_sample_views, water_sample_views
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r"standard", views.StandardViewSet, basename="standard")
-router.register(r"water", views.WaterViewSet, basename="water")
-router.register(r"vegetable", views.VegetableViewSet, basename="vegetable")
-router.register(r"stool", views.StoolViewSet, basename="stool")
+router.register(r"standard", views.StandardViewSetAPI, basename="standard")
+router.register(r"water", views.WaterViewSetAPI, basename="water")
+router.register(r"vegetable", views.VegetableViewSetAPI, basename="vegetable")
+router.register(r"stool", views.StoolViewSetAPI, basename="stool")
 
 
 # The API URLs are now determined automatically by the router.
@@ -18,17 +18,17 @@ urlpatterns = [
     path("api/samples/", include(router.urls)),
     path(
         "standard-samples/",
-        standard_sample_views.standard_home,
+        standard_sample_views.StandardListView.as_view(),
         name="standard_samples_home",
     ),
     path(
         "standard-samples/new/",
-        standard_sample_views.get_standard_form,
+        standard_sample_views.StandardFormView.as_view(),
         name="add_standard_sample",
     ),
     path(
-        "standard-samples/<str:sample_id>/",
-        standard_sample_views.standard_sample_detail,
+        "standard-samples/<slug:sample_id>/",
+        standard_sample_views.StandardDetailView.as_view(),
         name="standard_sample_detail",
     ),
     path(
@@ -38,17 +38,17 @@ urlpatterns = [
     ),
     path(
         "water-samples/",
-        water_sample_views.water_home,
+        water_sample_views.WaterListView.as_view(),
         name="water_samples_home",
     ),
     path(
         "water-samples/new/",
-        water_sample_views.get_water_form,
+        water_sample_views.WaterFormView.as_view(),
         name="add_water_sample",
     ),
     path(
-        "water-samples/<str:sample_id>/",
-        water_sample_views.water_sample_detail,
+        "water-samples/<slug:sample_id>/",
+        water_sample_views.WaterDetailView.as_view(),
         name="water_sample_detail",
     ),
     path(

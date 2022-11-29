@@ -1,9 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
-from django.http import Http404, HttpRequest
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import Http404
+from django.shortcuts import redirect, render
+from django.views import View
+from django.views.generic import DetailView, ListView
 
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
@@ -12,45 +15,50 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-def standard_home(request: HttpRequest):
-    latest_samples_list = Standard.objects.order_by("-id")[:5]
-    context = {"latest_samples_list": latest_samples_list, "sample_type": "standard"}
-    return render(request, "sample/sample_home.html", context)
+class StandardListView(LoginRequiredMixin, ListView):
+    queryset = Standard.objects.order_by("-date_of_collection")
+    template_name: str = "sample/sample_home.html"
+    context_object_name = "latest_samples_list"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sample_type"] = "standard"
+        return context
 
 
-@login_required
-def get_standard_form(request):
-    if request.method == "POST":
-        form = StandardForm(request.POST)
+class StandardFormView(LoginRequiredMixin, View):
+    form_class = StandardForm
+    template_name = "sample/standard_sample/standard_sample_form.html"
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
         if form.is_valid():
-            validated_data = form.cleaned_data
-            print(type(validated_data["date_of_collection"]))
-            validated_data.update({"user": request.user})
-            validated_data.update(
-                {
-                    "sample_id": create_sample_id(
-                        "standard", validated_data.get("date_of_collection")
-                    )
-                }
+            standard_sample = form.save(commit=False)
+            standard_sample.user = request.user
+            standard_sample.sample_id = create_sample_id(
+                "standard", standard_sample.date_of_collection
             )
-            standard_sample = Standard(**validated_data)
             print(f"Saving sample {standard_sample}")
             standard_sample.save()
+
+            # Create Slides and SlideImage entries in the database
             for i in range(SLIDE_COUNT):
                 slide = Slide(standard_sample=standard_sample, slide_number=i + 1)
-                print(f"Saving slide {slide}")
                 slide.save()
                 for j in range(IMAGE_COUNT):
                     for image_type, _ in IMAGE_TYPE_CHOICES:
                         slide_image = SlideImage(
-                            uploaded_by=validated_data.get("user"),
+                            uploaded_by=standard_sample.user,
                             slide=slide,
                             image="",
                             image_type=image_type,
                             image_id=f"{standard_sample}_S{i+1}_I{j+1}_{image_type}",
                             image_number=j + 1,
                         )
-                        print(f"Saving image {slide_image}")
                         slide_image.save()
             print(f"Finished creating sample {standard_sample}")
             messages.success(
@@ -58,36 +66,29 @@ def get_standard_form(request):
             )
             return redirect("sample:standard_samples_home")
 
-    else:
-        form = StandardForm()
-
-    return render(
-        request, "sample/standard_sample/standard_sample_form.html", {"form": form}
-    )
+        return render(request, self.template_name, {"form": form})
 
 
-@login_required
-def standard_sample_detail(request, sample_id=None):
-    standard_sample = get_object_or_404(Standard, sample_id=sample_id)
-    slides = Slide.objects.filter(standard_sample=standard_sample)
-    for slide in slides:
-        smartphone_images_count = SlideImage.objects.filter(
-            ~Q(image=""), slide=slide.id, image_type="S"
-        ).count()
-        brightfield_images_count = SlideImage.objects.filter(
-            ~Q(image=""), slide=slide.id, image_type="B"
-        ).count()
-        slide.smartphone_images_count = smartphone_images_count
-        slide.brightfield_images_count = brightfield_images_count
-    context = {
-        "sample": standard_sample,
-        "slides": slides,
-        "sample_type": "standard",
-    }
+class StandardDetailView(LoginRequiredMixin, DetailView):
+    template_name = "sample/standard_sample/standard_sample_detail.html"
+    slug_url_kwarg = "sample_id"
+    slug_field = "sample_id"
+    context_object_name = "sample"
+    model = Standard
 
-    return render(
-        request, "sample/standard_sample/standard_sample_detail.html", context
-    )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slides = Slide.objects.filter(standard_sample=self.get_object())
+        for slide in slides:
+            slide.smartphone_images_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="S"
+            ).count()
+            slide.brightfield_images_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="B"
+            ).count()
+        context["slides"] = slides
+        context["sample_type"] = "standard"
+        return context
 
 
 @login_required

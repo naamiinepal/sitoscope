@@ -14,7 +14,7 @@ from sample.serializers import (
 
 
 # Create your views here.
-class StandardViewSet(viewsets.ModelViewSet):
+class StandardViewSetAPI(viewsets.ModelViewSet):
     """
     List all standard samples, create new, or retrieve,
     update or delete individual samples.
@@ -49,7 +49,7 @@ class StandardViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 
-class WaterViewSet(viewsets.ModelViewSet):
+class WaterViewSetAPI(viewsets.ModelViewSet):
     """
     List all Water samples, create new, or retrieve,
     update or delete individual samples.
@@ -60,7 +60,7 @@ class WaterViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
 
 
-class VegetableViewSet(viewsets.ModelViewSet):
+class VegetableViewSetAPI(viewsets.ModelViewSet):
     """
     List all Vegetable samples, create new, or retrieve,
     update or delete individual samples.
@@ -71,7 +71,7 @@ class VegetableViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.DjangoModelPermissionsOrAnonReadOnly]
 
 
-class StoolViewSet(viewsets.ModelViewSet):
+class StoolViewSetAPI(viewsets.ModelViewSet):
     """
     List all Stool samples, create new, or retrieve,
     update or delete individual samples.

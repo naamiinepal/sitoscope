@@ -1,9 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
-from django.http import Http404, HttpRequest
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import Http404
+from django.shortcuts import redirect, render
+from django.views import View
+from django.views.generic import DetailView, ListView
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
@@ -14,86 +17,90 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-@login_required
-def water_home(request: HttpRequest):
-    latest_samples_list = Water.objects.order_by("-id")[:5]
-    context = {"latest_samples_list": latest_samples_list, "sample_type": "water"}
-    return render(request, "sample/sample_home.html", context)
+class WaterListView(LoginRequiredMixin, ListView):
+    queryset = Water.objects.order_by("-id")
+    template_name: str = "sample/sample_home.html"
+    context_object_name = "latest_samples_list"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sample_type"] = "water"
+        return context
 
 
-@login_required
-def get_water_form(request):
-    address_form = AddressForm(request.POST or None)
-    if request.method == "POST":
-        sample_form = WaterForm(request.POST, request.FILES)
+class WaterFormView(LoginRequiredMixin, View):
+    sample_form_class = WaterForm
+    address_form_class = AddressForm
+    template_name = "sample/water_sample/water_sample_form.html"
+
+    def get(self, request, *args, **kwargs):
+        sample_form = self.sample_form_class()
+        address_form = self.address_form_class()
+        return render(
+            request,
+            self.template_name,
+            {"sample_form": sample_form, "address_form": address_form},
+        )
+
+    def post(self, request, *args, **kwargs):
+        sample_form = self.sample_form_class(request.POST, request.FILES)
+        address_form = self.address_form_class(request.POST)
         if sample_form.is_valid() and address_form.is_valid():
-            validated_data = sample_form.cleaned_data
-            validated_data.update({"user": request.user})
-            validated_data.update(
-                {
-                    "site": address_form.cleaned_data.get("municipality"),
-                    "ward": address_form.cleaned_data.get("ward"),
-                    "locality": address_form.cleaned_data.get("locality"),
-                }
+            water_sample = sample_form.save(commit=False)
+            water_sample.user = request.user
+            water_sample.site = address_form.cleaned_data.get("municipality")
+            water_sample.ward = address_form.cleaned_data.get("ward")
+            water_sample.locality = address_form.cleaned_data.get("locality")
+            water_sample.sample_id = create_sample_id(
+                "water", water_sample.date_of_collection, water_sample.site
             )
-            validated_data.update(
-                {
-                    "sample_id": create_sample_id(
-                        "water",
-                        validated_data.get("date_of_collection"),
-                        validated_data.get("site"),
-                    )
-                }
-            )
-            water_sample = Water(**validated_data)
             print(f"Saving sample {water_sample}")
             water_sample.save()
             for i in range(SLIDE_COUNT):
                 slide = Slide(water_sample=water_sample, slide_number=i + 1)
-                print(f"Saving slide {slide}")
                 slide.save()
                 for j in range(IMAGE_COUNT):
                     for image_type, _ in IMAGE_TYPE_CHOICES:
                         slide_image = SlideImage(
-                            uploaded_by=validated_data.get("user"),
+                            uploaded_by=water_sample.user,
                             slide=slide,
                             image="",
                             image_type=image_type,
                             image_id=f"{water_sample}_S{i+1}_I{j+1}_{image_type}",
                             image_number=j + 1,
                         )
-                        print(f"Saving image {slide_image}")
                         slide_image.save()
             print(f"Finished creating sample {water_sample}")
             messages.success(request, f"Added new water sample {water_sample}.")
             return redirect("sample:water_samples_home")
 
-    else:
-        sample_form = WaterForm()
-
-    return render(
-        request,
-        "sample/water_sample/water_sample_form.html",
-        {"sample_form": sample_form, "address_form": address_form},
-    )
+        return render(
+            request,
+            self.template_name,
+            {"sample_form": sample_form, "address_form": address_form},
+        )
 
 
-@login_required
-def water_sample_detail(request, sample_id=None):
-    water_sample = get_object_or_404(Water, sample_id=sample_id)
-    slides = Slide.objects.filter(water_sample=water_sample)
-    for slide in slides:
-        smartphone_images_count = SlideImage.objects.filter(
-            ~Q(image=""), slide=slide.id, image_type="S"
-        ).count()
-        brightfield_images_count = SlideImage.objects.filter(
-            ~Q(image=""), slide=slide.id, image_type="B"
-        ).count()
-        slide.smartphone_images_count = smartphone_images_count
-        slide.brightfield_images_count = brightfield_images_count
-    context = {"sample": water_sample, "slides": slides, "sample_type": "water"}
+class WaterDetailView(LoginRequiredMixin, DetailView):
+    template_name = "sample/water_sample/water_sample_detail.html"
+    slug_url_kwarg = "sample_id"
+    slug_field = "sample_id"
+    context_object_name = "sample"
+    model = Water
 
-    return render(request, "sample/water_sample/water_sample_detail.html", context)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        slides = Slide.objects.filter(water_sample=self.get_object())
+        for slide in slides:
+            slide.smartphone_images_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="S"
+            ).count()
+            slide.brightfield_images_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="B"
+            ).count()
+        context["slides"] = slides
+        context["sample_type"] = "water"
+        return context
 
 
 @login_required
