@@ -5,23 +5,23 @@
     <tbody>
         <tr>
             <td>Date of collection</td>
-            <th scope="row">{{ standard_sample.date_of_collection }}</th>
+            <th scope="row">{{ sample.date_of_collection }}</th>
         </tr>
         <tr>
             <td>Matrix</td>
-            <th scope="row">{{ standard_sample.matrix }}</th>
+            <th scope="row">{{ sample.matrix }}</th>
         </tr>
         <tr>
             <td>Dilution Factor</td>
-            <th scope="row">{{ standard_sample.dilution_factor | floatformat:"4" }}</th>
+            <th scope="row">{{ sample.dilution_factor | floatformat:"4" }}</th>
         </tr>
         <tr>
             <td>Expected Concentration</td>
-            <th scope="row">{{ standard_sample.expected_concentration | floatformat:"4" }}</th>
+            <th scope="row">{{ sample.expected_concentration | floatformat:"4" }}</th>
         </tr>
         <tr>
             <td>Observed Concentration</td>
-            <th scope="row">{{ standard_sample.observed_concentration | floatformat:"4" }}</th>
+            <th scope="row">{{ sample.observed_concentration | floatformat:"4" }}</th>
         </tr>
     </tbody>
 </table>
