@@ -1,7 +1,8 @@
-from django.forms import ModelForm, Form
-from sample.models import Standard
-from django.forms.widgets import DateInput
 from django import forms
+from django.forms import Form, ModelForm
+from django.forms.widgets import DateInput
+
+from sample.models import Standard
 
 
 class StandardForm(ModelForm):
@@ -31,3 +32,7 @@ class SlideImagesForm(Form):
         widget=forms.FileInput(attrs={"multiple": True}),
         help_text="Select 15 slide images.",
     )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        print(cleaned_data)

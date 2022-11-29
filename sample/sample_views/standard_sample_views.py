@@ -1,32 +1,21 @@
-from django.shortcuts import render, redirect
-from sample.models import Standard, Slide, SlideImage
-from sample.const import IMAGE_TYPE_CHOICES, SLIDE_COUNT, IMAGE_COUNT
-from django.http import HttpRequest, Http404
-from django.contrib.auth.decorators import login_required
-from sample.forms.standard_sample_form import (
-    StandardForm,
-    SlideImagesForm,
-)
-from django.core.files.images import ImageFile
 from django.contrib import messages
-from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.core.files.images import ImageFile
 from django.db.models import Q
-import nanoid
+from django.http import Http404, HttpRequest
+from django.shortcuts import get_object_or_404, redirect, render
+
+from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
+from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
+from sample.models import Slide, SlideImage, Standard
+from sample.utils import create_sample_id
 
 
 # Create your views here
 def standard_home(request: HttpRequest):
     latest_samples_list = Standard.objects.order_by("-id")[:5]
-    context = {"latest_samples_list": latest_samples_list}
-    return render(request, "sample/standard_sample/standard_sample_home.html", context)
-
-
-def create_standard_sample_id(date):
-    # Utility to create standard sample id
-    sample_number = nanoid.generate(
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 5
-    )
-    return f"Standard_{date.strftime('%Y%m%d')}_{sample_number}"
+    context = {"latest_samples_list": latest_samples_list, "sample_type": "standard"}
+    return render(request, "sample/sample_home.html", context)
 
 
 @login_required
@@ -39,8 +28,8 @@ def get_standard_form(request):
             validated_data.update({"user": request.user})
             validated_data.update(
                 {
-                    "sample_id": create_standard_sample_id(
-                        validated_data.get("date_of_collection")
+                    "sample_id": create_sample_id(
+                        "standard", validated_data.get("date_of_collection")
                     )
                 }
             )
@@ -64,7 +53,9 @@ def get_standard_form(request):
                         print(f"Saving image {slide_image}")
                         slide_image.save()
             print(f"Finished creating sample {standard_sample}")
-            messages.success(request, "Changes successfully saved.")
+            messages.success(
+                request, f"Standard sample {standard_sample} successfully saved."
+            )
             return redirect("sample:standard_samples_home")
 
     else:
@@ -88,7 +79,11 @@ def standard_sample_detail(request, sample_id=None):
         ).count()
         slide.smartphone_images_count = smartphone_images_count
         slide.brightfield_images_count = brightfield_images_count
-    context = {"standard_sample": standard_sample, "slides": slides}
+    context = {
+        "sample": standard_sample,
+        "slides": slides,
+        "sample_type": "standard",
+    }
 
     return render(
         request, "sample/standard_sample/standard_sample_detail.html", context
@@ -121,7 +116,7 @@ def standard_slide_image_details(
         slide=slide,
         image_type=db_image_type,
     )
-    show_form = False if db_images.filter(~Q(image="")).count() == 15 else True
+    show_form = db_images.filter(~Q(image="")).count() != 15
 
     form = SlideImagesForm()
     if request.method == "POST":
@@ -151,7 +146,6 @@ def standard_slide_image_details(
         "form": form,
         "images": db_images,
         "show_form": show_form,
+        "sample_type": "standard",
     }
-    return render(
-        request, "sample/standard_sample/standard_slide_image_upload_form.html", context
-    )
+    return render(request, "sample/slide_image_upload_form.html", context)

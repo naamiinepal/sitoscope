@@ -1,5 +1,3 @@
-import nanoid
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.files.images import ImageFile
@@ -12,6 +10,7 @@ from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm
 from sample.forms.water_sample_forms import WaterForm
 from sample.models import Slide, SlideImage, Water
+from sample.utils import create_sample_id
 
 
 # Create your views here
@@ -20,15 +19,6 @@ def water_home(request: HttpRequest):
     latest_samples_list = Water.objects.order_by("-id")[:5]
     context = {"latest_samples_list": latest_samples_list, "sample_type": "water"}
     return render(request, "sample/sample_home.html", context)
-
-
-def create_water_sample_id(date, municipality):
-    # Utility to create water sample id
-    site = f"{municipality.district.province.code}-{municipality.name}"
-    sample_number = nanoid.generate(
-        "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 5
-    )
-    return f"W_{site}_{date.strftime('%Y%m%d')}_{sample_number}"
 
 
 @login_required
@@ -48,7 +38,8 @@ def get_water_form(request):
             )
             validated_data.update(
                 {
-                    "sample_id": create_water_sample_id(
+                    "sample_id": create_sample_id(
+                        "water",
                         validated_data.get("date_of_collection"),
                         validated_data.get("site"),
                     )
@@ -129,7 +120,7 @@ def water_slide_image_details(
         slide=slide,
         image_type=db_image_type,
     )
-    show_form = False if db_images.filter(~Q(image="")).count() == 15 else True
+    show_form = db_images.filter(~Q(image="")).count() != 15
 
     form = SlideImagesForm()
     if request.method == "POST":
@@ -162,6 +153,4 @@ def water_slide_image_details(
         "show_form": show_form,
         "sample_type": "water",
     }
-    return render(
-        request, "sample/slide_image_upload_form.html", context
-    )
+    return render(request, "sample/slide_image_upload_form.html", context)

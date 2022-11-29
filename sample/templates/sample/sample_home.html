@@ -31,7 +31,8 @@
         <ul class="list-group list-group-flush">
             {% for sample in latest_samples_list %}
             <li class="list-group-item">
-                <a href="{% url detail_url_name sample.sample_id %}" class="text-break">{{sample.sample_id}}</a>
+                <a href="{% url detail_url_name sample.sample_id %}"
+                    class="text-break text-decoration-none">{{sample.sample_id}}</a>
             </li>
             {% endfor %}
         </ul>

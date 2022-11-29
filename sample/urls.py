@@ -1,7 +1,8 @@
-from django.urls import path, include
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
 from sample import views
 from sample.sample_views import standard_sample_views, water_sample_views
-from rest_framework.routers import DefaultRouter
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()

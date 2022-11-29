@@ -1,18 +1,6 @@
-{% extends 'base.html' %}
+{% extends 'sample/sample_detail.html' %}
 
-{% block body %}
-
-<h5 class="text-center">{{ standard_sample }}</h5>
-<div class="row">
-    <div class="col"></div>
-    <div class="col">
-        <div class="text-success">
-            <hr>
-        </div>
-    </div>
-    <div class="col"></div>
-</div>
-
+{% block sample_detail %}
 <table class="table">
     <tbody>
         <tr>
@@ -37,34 +25,4 @@
         </tr>
     </tbody>
 </table>
-
-{% if slides %}
-{% for slide in slides %}
-<table class="table mt-2 table-borderless">
-    <thead class="table-light">
-        <tr>
-            <th scope="col">Slide {{ forloop.counter}}</th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr class="text-primary">
-            <td>
-                <a class="link-primary"
-                    href="{% url 'sample:standard_slide_image' sample_id=standard_sample.sample_id slide_number=slide.slide_number image_type='smartphone' %}">Smartphone</a>
-            </td>
-            <td>{{ slide.smartphone_images_count }}/15</td>
-        </tr>
-        <tr class="text-success">
-            <td>
-                <a href="{% url 'sample:standard_slide_image' sample_id=standard_sample.sample_id slide_number=slide.slide_number image_type='brightfield' %}"
-                    class="link-success">Brightfield</a>
-            </td>
-            <td>{{ slide.brightfield_images_count }}/15</td>
-        </tr>
-    </tbody>
-</table>
-{% endfor %}
-{% endif %}
-
 {% endblock %}
