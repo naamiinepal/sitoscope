@@ -134,10 +134,6 @@ def water_slide_image_details(
         form = SlideImagesForm(request.POST, request.FILES)
         if form.is_valid():
             files = request.FILES.getlist("images")
-            if len(files) != 15:
-                messages.error(request, "Number of images must be exactly 15.")
-                return redirect(request.path_info)
-            print("Lenghts", len(files), len(db_images))
             for file, image in zip(files, db_images):
                 slide_image = SlideImage(
                     pk=image.pk,

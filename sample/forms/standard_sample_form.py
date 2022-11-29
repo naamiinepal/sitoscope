@@ -33,6 +33,8 @@ class SlideImagesForm(Form):
         help_text="Select 15 slide images.",
     )
 
-    def clean(self):
-        cleaned_data = super().clean()
-        print(cleaned_data)
+    def clean_images(self):
+        files = self.files.getlist('images')
+        if len(files) != 15:
+            raise forms.ValidationError("Please upload exactly 15 images.")
+        return files
