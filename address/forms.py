@@ -1,6 +1,6 @@
 from django import forms
 
-from . import models
+from address import models
 
 
 class AddressForm(forms.Form):

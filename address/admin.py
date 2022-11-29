@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Province, District, Municipality, Ward
+
+from address.models import District, Municipality, Province, Ward
 
 # Register your models here.
 admin.site.register(Province)

@@ -11,8 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
-from django.contrib.messages import constants as messages
 
+from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-&*i92_43o6=y#(6dkob$^=!ptd4!vlp*)1s@vmejpui6k6t&j9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "192.168.1.111", "192.168.1.83"]
+ALLOWED_HOSTS = ["localhost", "192.168.1.111", "192.168.1.83", "192.168.1.73"]
 
 
 # Application definition
@@ -134,7 +134,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
 
 # Authentication Url
 LOGIN_REDIRECT_URL = "user:home"

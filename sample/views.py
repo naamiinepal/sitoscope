@@ -1,16 +1,16 @@
-from sample.models import Standard, Water, Vegetable, Stool, Slide, SlideImage
-from sample.serializers import (
-    StandardSerializer,
-    WaterSerializer,
-    VegetableSerializer,
-    StoolSerializer,
-    SlideSerializer,
-    SlideImageSerializer,
-)
-from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from sample.models import Slide, SlideImage, Standard, Stool, Vegetable, Water
+from sample.serializers import (
+    SlideImageSerializer,
+    SlideSerializer,
+    StandardSerializer,
+    StoolSerializer,
+    VegetableSerializer,
+    WaterSerializer,
+)
 
 
 # Create your views here.

@@ -1,14 +1,16 @@
-from django.db import models
-from django.conf import settings
 from datetime import date
-from django.core.validators import MinValueValidator, MaxValueValidator
+
+from django.conf import settings
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import models
+
+from address.models import Municipality
 from sample.const import (
     GENDER_CHOICES,
+    IMAGE_TYPE_CHOICES,
     VEGETABLE_CHOICES,
     WATER_TYPE_CHOICES,
-    IMAGE_TYPE_CHOICES,
 )
-from address.models import Municipality
 from sample.utils import upload_samples
 
 
