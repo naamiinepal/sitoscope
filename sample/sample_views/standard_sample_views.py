@@ -5,8 +5,13 @@ from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import redirect, render
-from django.views import View
-from django.views.generic import DetailView, ListView
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, FormView, ListView
+from view_breadcrumbs import (
+    BaseBreadcrumbMixin,
+    CreateBreadcrumbMixin,
+    DetailBreadcrumbMixin,
+)
 
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
@@ -15,10 +20,11 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-class StandardListView(LoginRequiredMixin, ListView):
-    queryset = Standard.objects.order_by("-date_of_collection")
+class StandardListView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+    queryset = Standard.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    crumbs = [("Standard", reverse_lazy("sample:standard_list"))]  # OR reverse_lazy
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -26,55 +32,50 @@ class StandardListView(LoginRequiredMixin, ListView):
         return context
 
 
-class StandardFormView(LoginRequiredMixin, View):
+class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     form_class = StandardForm
-    template_name = "sample/standard_sample/standard_sample_form.html"
+    template_name = "sample/standard_sample/standard_create.html"
+    success_url = reverse_lazy("sample:standard_list")
+    crumbs = [("Standard", success_url), ("New", "")]
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class()
-        return render(request, self.template_name, {"form": form})
+    def form_valid(self, form):
+        standard_sample = form.save(commit=False)
+        standard_sample.user = self.request.user
+        standard_sample.sample_id = create_sample_id(
+            "standard", standard_sample.date_of_collection
+        )
+        print(f"Saving sample {standard_sample}")
+        standard_sample.save()
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            standard_sample = form.save(commit=False)
-            standard_sample.user = request.user
-            standard_sample.sample_id = create_sample_id(
-                "standard", standard_sample.date_of_collection
-            )
-            print(f"Saving sample {standard_sample}")
-            standard_sample.save()
-
-            # Create Slides and SlideImage entries in the database
-            for i in range(SLIDE_COUNT):
-                slide = Slide(standard_sample=standard_sample, slide_number=i + 1)
-                slide.save()
-                for j in range(IMAGE_COUNT):
-                    for image_type, _ in IMAGE_TYPE_CHOICES:
-                        slide_image = SlideImage(
-                            uploaded_by=standard_sample.user,
-                            slide=slide,
-                            image="",
-                            image_type=image_type,
-                            image_id=f"{standard_sample}_S{i+1}_I{j+1}_{image_type}",
-                            image_number=j + 1,
-                        )
-                        slide_image.save()
-            print(f"Finished creating sample {standard_sample}")
-            messages.success(
-                request, f"Standard sample {standard_sample} successfully saved."
-            )
-            return redirect("sample:standard_samples_home")
-
-        return render(request, self.template_name, {"form": form})
+        # Create Slides and SlideImage entries in the database
+        for i in range(1, SLIDE_COUNT + 1):
+            slide = Slide(standard_sample=standard_sample, slide_number=i)
+            slide.save()
+            for j in range(1, IMAGE_COUNT + 1):
+                for image_type, _ in IMAGE_TYPE_CHOICES:
+                    slide_image = SlideImage(
+                        uploaded_by=standard_sample.user,
+                        slide=slide,
+                        image="",
+                        image_type=image_type,
+                        image_id=f"{standard_sample}_S{i}_I{j}_{image_type}",
+                        image_number=j,
+                    )
+                    slide_image.save()
+        print(f"Finished creating sample {standard_sample}")
+        messages.success(
+            self.request, f"Standard sample {standard_sample} successfully saved."
+        )
+        return super().form_valid(form)
 
 
-class StandardDetailView(LoginRequiredMixin, DetailView):
-    template_name = "sample/standard_sample/standard_sample_detail.html"
+class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+    template_name = "sample/standard_sample/standard_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
     context_object_name = "sample"
     model = Standard
+    breadcrumb_use_pk = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -146,4 +147,4 @@ def standard_slide_image_details(
         "show_form": show_form,
         "sample_type": "standard",
     }
-    return render(request, "sample/slide_image_upload_form.html", context)
+    return render(request, "sample/slide_detail.html", context)

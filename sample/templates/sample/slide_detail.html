@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block body %}
+{% with upload_url="sample:"|add:sample_type|add:"_slide_image" %}
+{% if image_type == 'smartphone' %}
+<h4 class="text-primary">{{ image_type|title }}</h4>
+<p class="lead">{{ slide }}</p>
+<div class="text-primary">
+    <hr>
+</div>
+{% else %}
+<h4 class="text-success">{{ image_type|title }}</h4>
+<p class="lead">{{ slide }}</p>
+<div class="text-success">
+    <hr>
+</div>
+{% endif %}
+
+{% if images %}
+{% for image in images %}
+<figure class="figure">
+    <img src="{{ image.image.url }}" class="figure-img img-thumbnail rounded" alt="{{ image.image_id }}">
+    <figcaption class="figure-caption">{{ image }}</figcaption>
+</figure>
+{% endfor %}
+{% else %}
+<div class="alert alert-danger" role="alert">
+    Images can nout be found.
+  </div>
+
+{% endif %}
+{% endwith %}
+{% endblock %}
+
+
+{% block script %}
+<script src="{% static 'js/buttonSpinner.js' %}"></script>
+
+{% endblock %}

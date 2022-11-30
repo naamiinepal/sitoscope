@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "sample",
     "user",
     "pwa",
-    "dynamic_breadcrumbs",
+    "view_breadcrumbs",
 ]
 
 MIDDLEWARE = [
@@ -71,7 +71,6 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "dynamic_breadcrumbs.context_processors.breadcrumbs",
             ],
         },
     },

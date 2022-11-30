@@ -1,12 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import redirect, render
-from django.views import View
-from django.views.generic import DetailView, ListView
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, FormView, ListView
+from view_breadcrumbs import (
+    BaseBreadcrumbMixin,
+    CreateBreadcrumbMixin,
+    DetailBreadcrumbMixin,
+)
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
@@ -17,10 +21,11 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-class WaterListView(LoginRequiredMixin, ListView):
+class WaterListView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
     queryset = Water.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    crumbs = [("Water", reverse_lazy("sample:water_list"))]  # OR reverse_lazy
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -28,10 +33,12 @@ class WaterListView(LoginRequiredMixin, ListView):
         return context
 
 
-class WaterFormView(LoginRequiredMixin, View):
+class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     sample_form_class = WaterForm
     address_form_class = AddressForm
-    template_name = "sample/water_sample/water_sample_form.html"
+    context_object_name = "latest_samples_list"
+    template_name = "sample/water_sample/water_create.html"
+    crumbs = [("Water", reverse_lazy("sample:water_list")), ("New", "")]
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -72,7 +79,7 @@ class WaterFormView(LoginRequiredMixin, View):
                         slide_image.save()
             print(f"Finished creating sample {water_sample}")
             messages.success(request, f"Added new water sample {water_sample}.")
-            return redirect("sample:water_samples_home")
+            return redirect("sample:water_list")
 
         return render(
             request,
@@ -81,12 +88,13 @@ class WaterFormView(LoginRequiredMixin, View):
         )
 
 
-class WaterDetailView(LoginRequiredMixin, DetailView):
-    template_name = "sample/water_sample/water_sample_detail.html"
+class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+    template_name = "sample/water_sample/water_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
     context_object_name = "sample"
     model = Water
+    breadcrumb_use_pk = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -103,57 +111,135 @@ class WaterDetailView(LoginRequiredMixin, DetailView):
         return context
 
 
-@login_required
-def water_slide_image_details(
-    request, sample_id=None, slide_number=1, image_type="smartphone"
-):
-    if image_type not in ["smartphone", "brightfield"]:
-        raise Http404(
-            f"Image type {image_type} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
-        )
-    if slide_number < 1 or slide_number > 3:
-        raise Http404(
-            f"Slide number {slide_number} is not valid. Valid slide numbers: (1, 2, 3)"
-        )
-    try:
-        water_sample = Water.objects.get(sample_id=sample_id)
-    except Water.DoesNotExist:
-        raise Http404(
-            f"Sample {sample_id} is not valid. Please make sure you used the correct sample id."
-        )
-    slide = Slide.objects.get(water_sample=water_sample, slide_number=slide_number)
-    db_image_type = "B" if image_type == "brightfield" else "S"
-    db_images = SlideImage.objects.all().filter(
-        slide=slide,
-        image_type=db_image_type,
-    )
-    show_form = db_images.filter(~Q(image="")).count() != 15
+class WaterSlideImageCreateView(LoginRequiredMixin, DetailBreadcrumbMixin, FormView):
+    template_name = "sample/slide_create.html"
+    form_class = SlideImagesForm
+    breadcrumb_use_pk = False
+    success_url = reverse_lazy("sample:water_list")
+    crumbs = [
+        ("Water", reverse_lazy("sample:water_list")),
+    ]  # OR reverse_lazy
 
-    form = SlideImagesForm()
-    if request.method == "POST":
-        form = SlideImagesForm(request.POST, request.FILES)
-        if form.is_valid():
-            files = request.FILES.getlist("images")
-            for file, image in zip(files, db_images):
-                slide_image = SlideImage(
-                    pk=image.pk,
-                    uploaded_by=request.user,
-                    slide=slide,
-                    image=ImageFile(file),
-                    image_id=image.image_id,
-                    image_number=image.image_number,
-                    image_type=db_image_type,
-                )
-                slide_image.save()
-            return redirect(request.path_info)
+    def dispatch(self, request, *args, **kwargs):
+        self.crumbs = [
+            ("Water", reverse_lazy("sample:water_list")),
+            (
+                self.kwargs["sample_id"],
+                reverse_lazy(
+                    "sample:water_detail",
+                    kwargs={"sample_id": self.kwargs["sample_id"]},
+                ),
+            ),
+            (self.kwargs["slide_number"], ""),
+            (self.kwargs["image_type"], ""),
+            ("create", ""),
+        ]
+        self.success_url = reverse_lazy(
+            "sample:water_list", kwargs={"sample_id": self.kwargs["sample_id"]}
+        )
+        return super(WaterSlideImageCreateView, self).dispatch(request, *args, **kwargs)
 
-    context = {
-        "image_type": image_type,
-        "sample_id": sample_id,
-        "slide": slide,
-        "form": form,
-        "images": db_images,
-        "show_form": show_form,
-        "sample_type": "water",
-    }
-    return render(request, "sample/slide_image_upload_form.html", context)
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        if self.kwargs["image_type"] not in ["smartphone", "brightfield"]:
+            raise Http404(
+                f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
+            )
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+            raise Http404(
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+            )
+        try:
+            water_sample = Water.objects.get(sample_id=self.kwargs["sample_id"])
+        except Water.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        context["slide"] = get_object_or_404(
+            Slide,
+            water_sample=water_sample,
+            slide_number=int(self.kwargs["slide_number"]),
+        )
+        context["image_type"] = self.kwargs["image_type"]
+        context["sample_id"] = self.kwargs["sample_id"]
+        context["sample_type"] = "water"
+        print(context["slide"])
+        return context
+
+    def form_valid(self, form, **kwargs):
+        water_sample = Water.objects.get(sample_id=self.kwargs["sample_id"])
+        slide = get_object_or_404(
+            Slide,
+            water_sample=water_sample,
+            slide_number=int(self.kwargs["slide_number"]),
+        )
+        db_image_type = "B" if self.kwargs["image_type"] == "brightfield" else "S"
+        db_images = SlideImage.objects.all().filter(
+            slide=slide,
+            image_type=db_image_type,
+        )
+        files = self.request.FILES.getlist("images")
+        for file, image in zip(files, db_images):
+            print(file)
+            slide_image = SlideImage(
+                pk=image.pk,
+                uploaded_by=self.request.user,
+                slide=image.slide,
+                image=ImageFile(file),
+                image_id=image.image_id,
+                image_number=image.image_number,
+                image_type=db_image_type,
+            )
+            slide_image.save()
+        messages.success(self.request, "Successfully added images.")
+        return super().form_valid(form)
+
+
+class WaterSlideImageDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+    template_name = "sample/slide_detail.html"
+    breadcrumb_use_pk = False
+    crumbs = [
+        ("Water", reverse_lazy("sample:water_list")),
+    ]  # OR reverse_lazy
+
+    def dispatch(self, request, *args, **kwargs):
+        self.crumbs = [
+            ("Water", reverse_lazy("sample:water_list")),
+            (
+                self.kwargs["sample_id"],
+                reverse_lazy(
+                    "sample:water_detail",
+                    kwargs={"sample_id": self.kwargs["sample_id"]},
+                ),
+            ),
+            (self.kwargs["slide_number"], ""),
+            (self.kwargs["image_type"], ""),
+        ]
+        return super(WaterSlideImageCreateView, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        if self.kwargs["image_type"] not in ["smartphone", "brightfield"]:
+            raise Http404(
+                f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
+            )
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+            raise Http404(
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+            )
+        try:
+            water_sample = Water.objects.get(sample_id=self.kwargs["sample_id"])
+        except Water.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        context["slide"] = get_object_or_404(
+            Slide,
+            water_sample=water_sample,
+            slide_number=int(self.kwargs["slide_number"]),
+        )
+        context["image_type"] = self.kwargs["image_type"]
+        context["sample_type"] = "water"
+        return context

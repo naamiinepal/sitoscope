@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block body %}
-{% with add_url_name="sample:add_"|add:sample_type|add:"_sample" %}
-{% with detail_url_name="sample:"|add:sample_type|add:"_sample_detail" %}
+{% with add_url_name="sample:"|add:sample_type|add:"_create" %}
+{% with detail_url_name="sample:"|add:sample_type|add:"_detail" %}
 
 <div class="container text-center">
     <h5>{{ sample_type|title }} Samples</h5>

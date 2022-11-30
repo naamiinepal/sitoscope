@@ -1,4 +1,5 @@
 {% load pwa %}
+{% load view_breadcrumbs %}
 <!doctype html>
 <html lang="en">
 
@@ -70,11 +71,10 @@
             <div class="col col-lg-2">
             </div>
             <div class="col-md-auto">
-                {% if breadcrumbs %}
-                <div class="container">
-                    {% include "dynamic_breadcrumbs/breadcrumbs.html" with breadcrumbs=breadcrumbs%}
-                </div>
-                {% endif %}
+
+                {% block breadcrumbs %}
+                {% render_breadcrumbs "view_breadcrumbs/bootstrap5.html" %}
+                {% endblock %}
                 {% include 'partials/messages.html' %}
                 {% block body%}
                 {% endblock %}

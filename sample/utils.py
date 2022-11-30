@@ -2,6 +2,7 @@ import os
 
 import nanoid
 from django.conf import settings
+from django.utils.text import slugify
 
 
 def upload_samples(instance, filename):
@@ -60,7 +61,7 @@ def create_sample_id(sample_type, date, municipality=None):
         sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
         return f"Standard_{date.strftime('%Y%m%d')}_{sample_number}"
     else:
-        site = f"{municipality.district.province.code}-{municipality.name}"
+        site = f"{municipality.district.province.code}-{slugify(municipality.name)}"
         sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
         sample_type = sample_type[0].upper()
         return f"{sample_type}_{site}_{date.strftime('%Y%m%d')}_{sample_number}"

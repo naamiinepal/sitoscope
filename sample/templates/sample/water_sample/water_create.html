@@ -8,7 +8,7 @@ New Water Sample
 
 {% block body %}
 <h5>Add new water sample</h5>
-<form action="{% url 'sample:add_water_sample' %}" method="post" enctype="multipart/form-data" id="form">
+<form action="{% url 'sample:water_create' %}" method="post" enctype="multipart/form-data" id="form">
     {% csrf_token %}
     {{ address_form|crispy }}
     {{ sample_form|crispy }}

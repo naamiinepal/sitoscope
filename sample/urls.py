@@ -19,17 +19,17 @@ urlpatterns = [
     path(
         "standard-samples/",
         standard_sample_views.StandardListView.as_view(),
-        name="standard_samples_home",
+        name="standard_list",
     ),
     path(
         "standard-samples/new/",
         standard_sample_views.StandardFormView.as_view(),
-        name="add_standard_sample",
+        name="standard_create",
     ),
     path(
         "standard-samples/<slug:sample_id>/",
         standard_sample_views.StandardDetailView.as_view(),
-        name="standard_sample_detail",
+        name="standard_detail",
     ),
     path(
         "standard-samples/<str:sample_id>/<int:slide_number>/<str:image_type>",
@@ -39,21 +39,26 @@ urlpatterns = [
     path(
         "water-samples/",
         water_sample_views.WaterListView.as_view(),
-        name="water_samples_home",
+        name="water_list",
     ),
     path(
         "water-samples/new/",
         water_sample_views.WaterFormView.as_view(),
-        name="add_water_sample",
+        name="water_create",
     ),
     path(
         "water-samples/<slug:sample_id>/",
         water_sample_views.WaterDetailView.as_view(),
-        name="water_sample_detail",
+        name="water_detail",
     ),
     path(
-        "water-samples/<str:sample_id>/<int:slide_number>/<str:image_type>",
-        water_sample_views.water_slide_image_details,
+        "water-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>/upload",
+        water_sample_views.WaterSlideImageCreateView.as_view(),
+        name="water_slide_image_upload",
+    ),
+    path(
+        "water-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
+        water_sample_views.WaterSlideImageDetailView.as_view(),
         name="water_slide_image",
     ),
 ]

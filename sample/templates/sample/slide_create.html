@@ -17,8 +17,6 @@
 </div>
 {% endif %}
 
-{% if show_form %}
-
 <div>
     <span>
         <form action="{% url upload_url sample_id=sample_id slide_number=slide.slide_number image_type=image_type %}"
@@ -29,20 +27,8 @@
         </form>
     </span>
 </div>
-
-{% endif %}
-
-{% if images and not show_form %}
-{% for image in images %}
-<figure class="figure">
-    <img src="{{ image.image.url }}" class="figure-img img-thumbnail rounded" alt="{{ image.image_id }}">
-    <figcaption class="figure-caption">{{ image }}</figcaption>
-</figure>
-{% endfor %}
-{% endif %}
 {% endwith %}
 {% endblock %}
-
 
 {% block script %}
 <script src="{% static 'js/buttonSpinner.js' %}"></script>
