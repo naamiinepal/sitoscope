@@ -1,10 +1,9 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import DetailView, FormView, ListView
 from view_breadcrumbs import (
@@ -92,59 +91,160 @@ class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
         return context
 
 
-@login_required
-def standard_slide_image_details(
-    request, sample_id=None, slide_number=1, image_type="smartphone"
-):
-    if image_type not in ["smartphone", "brightfield"]:
-        raise Http404(
-            f"Image type {image_type} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
-        )
-    if slide_number < 1 or slide_number > 3:
-        raise Http404(
-            f"Slide number {slide_number} is not valid. Valid slide numbers: (1, 2, 3)"
-        )
-    try:
-        standard_sample = Standard.objects.get(sample_id=sample_id)
-    except Standard.DoesNotExist:
-        raise Http404(
-            f"Sample {sample_id} is not valid. Please make sure you used the correct sample id."
-        )
-    slide = Slide.objects.get(
-        standard_sample=standard_sample, slide_number=slide_number
-    )
-    db_image_type = "B" if image_type == "brightfield" else "S"
-    db_images = SlideImage.objects.all().filter(
-        slide=slide,
-        image_type=db_image_type,
-    )
-    show_form = db_images.filter(~Q(image="")).count() != 15
+class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
+    template_name = "sample/slide_create.html"
+    form_class = SlideImagesForm
+    success_url = reverse_lazy("sample:standard_list")
+    crumbs = [
+        ("Standard", reverse_lazy("sample:standard_list")),
+    ]  # OR reverse_lazy
 
-    form = SlideImagesForm()
-    if request.method == "POST":
-        form = SlideImagesForm(request.POST, request.FILES)
-        if form.is_valid():
-            files = request.FILES.getlist("images")
-            for file, image in zip(files, db_images):
-                slide_image = SlideImage(
-                    pk=image.pk,
-                    uploaded_by=request.user,
-                    slide=slide,
-                    image=ImageFile(file),
-                    image_id=image.image_id,
-                    image_number=image.image_number,
-                    image_type=db_image_type,
-                )
-                slide_image.save()
-            return redirect(request.path_info)
+    def dispatch(self, request, *args, **kwargs):
+        self.crumbs = [
+            ("Standard", reverse_lazy("sample:standard_list")),
+            (
+                self.kwargs["sample_id"],
+                reverse_lazy(
+                    "sample:standard_detail",
+                    kwargs={"sample_id": self.kwargs["sample_id"]},
+                ),
+            ),
+            (self.kwargs["slide_number"], ""),
+            (self.kwargs["image_type"], ""),
+            ("create", ""),
+        ]
+        self.success_url = reverse_lazy(
+            "sample:standard_slide_image",
+            kwargs={
+                "sample_id": self.kwargs["sample_id"],
+                "slide_number": self.kwargs["slide_number"],
+                "image_type": self.kwargs["image_type"],
+            },
+        )
+        return super(StandardSlideImageCreateView, self).dispatch(
+            request, *args, **kwargs
+        )
 
-    context = {
-        "image_type": image_type,
-        "sample_id": sample_id,
-        "slide": slide,
-        "form": form,
-        "images": db_images,
-        "show_form": show_form,
-        "sample_type": "standard",
-    }
-    return render(request, "sample/slide_detail.html", context)
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        if self.kwargs["image_type"] not in ["smartphone", "brightfield"]:
+            raise Http404(
+                f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
+            )
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+            raise Http404(
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+            )
+        try:
+            standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
+        except Standard.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        context["slide"] = get_object_or_404(
+            Slide,
+            standard_sample=standard_sample,
+            slide_number=int(self.kwargs["slide_number"]),
+        )
+        context["image_type"] = self.kwargs["image_type"]
+        context["sample_id"] = self.kwargs["sample_id"]
+        context["sample_type"] = "standard"
+        print(context["slide"])
+        return context
+
+    def form_valid(self, form, **kwargs):
+        standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
+        slide = get_object_or_404(
+            Slide,
+            standard_sample=standard_sample,
+            slide_number=int(self.kwargs["slide_number"]),
+        )
+        db_image_type = "B" if self.kwargs["image_type"] == "brightfield" else "S"
+        db_images = SlideImage.objects.all().filter(
+            slide=slide,
+            image_type=db_image_type,
+        )
+        files = self.request.FILES.getlist("images")
+        for file, image in zip(files, db_images):
+            print(file)
+            slide_image = SlideImage(
+                pk=image.pk,
+                uploaded_by=self.request.user,
+                slide=image.slide,
+                image=ImageFile(file),
+                image_id=image.image_id,
+                image_number=image.image_number,
+                image_type=db_image_type,
+            )
+            slide_image.save()
+        messages.success(self.request, "Successfully added images.")
+        return super().form_valid(form)
+
+
+class StandardSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+    template_name = "sample/slide_detail.html"
+    breadcrumb_use_pk = False
+    crumbs = [
+        ("Standard", reverse_lazy("sample:standard_list")),
+    ]  # OR reverse_lazy
+    context_object_name = "images"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.crumbs = [
+            ("Standard", reverse_lazy("sample:standard_list")),
+            (
+                self.kwargs["sample_id"],
+                reverse_lazy(
+                    "sample:standard_detail",
+                    kwargs={"sample_id": self.kwargs["sample_id"]},
+                ),
+            ),
+            (self.kwargs["slide_number"], ""),
+            (self.kwargs["image_type"], ""),
+        ]
+        return super(StandardSlideImageDetailView, self).dispatch(
+            request, *args, **kwargs
+        )
+
+    def get_queryset(self):
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        if self.kwargs["image_type"] not in ["smartphone", "brightfield"]:
+            raise Http404(
+                f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
+            )
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+            raise Http404(
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+            )
+        try:
+            standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
+        except Standard.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        db_image_type = "B" if self.kwargs["image_type"] == "brightfield" else "S"
+
+        slide = Slide.objects.get(
+            standard_sample=standard_sample, slide_number=self.kwargs["slide_number"]
+        )
+        return SlideImage.objects.all().filter(
+            slide=slide,
+            image_type=db_image_type,
+        )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        try:
+            standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
+        except Standard.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        context["slide"] = Slide.objects.get(
+            standard_sample=standard_sample, slide_number=self.kwargs["slide_number"]
+        )
+        context["image_type"] = self.kwargs["image_type"]
+        context["sample_type"] = "standard"
+        return context

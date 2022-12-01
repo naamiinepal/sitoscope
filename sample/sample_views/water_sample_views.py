@@ -111,10 +111,9 @@ class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
         return context
 
 
-class WaterSlideImageCreateView(LoginRequiredMixin, DetailBreadcrumbMixin, FormView):
+class WaterSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
     template_name = "sample/slide_create.html"
     form_class = SlideImagesForm
-    breadcrumb_use_pk = False
     success_url = reverse_lazy("sample:water_list")
     crumbs = [
         ("Water", reverse_lazy("sample:water_list")),
@@ -135,7 +134,12 @@ class WaterSlideImageCreateView(LoginRequiredMixin, DetailBreadcrumbMixin, FormV
             ("create", ""),
         ]
         self.success_url = reverse_lazy(
-            "sample:water_list", kwargs={"sample_id": self.kwargs["sample_id"]}
+            "sample:water_slide_image",
+            kwargs={
+                "sample_id": self.kwargs["sample_id"],
+                "slide_number": self.kwargs["slide_number"],
+                "image_type": self.kwargs["image_type"],
+            },
         )
         return super(WaterSlideImageCreateView, self).dispatch(request, *args, **kwargs)
 
@@ -196,12 +200,13 @@ class WaterSlideImageCreateView(LoginRequiredMixin, DetailBreadcrumbMixin, FormV
         return super().form_valid(form)
 
 
-class WaterSlideImageDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+class WaterSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
     template_name = "sample/slide_detail.html"
     breadcrumb_use_pk = False
     crumbs = [
         ("Water", reverse_lazy("sample:water_list")),
     ]  # OR reverse_lazy
+    context_object_name = "images"
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -216,10 +221,9 @@ class WaterSlideImageDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, Detai
             (self.kwargs["slide_number"], ""),
             (self.kwargs["image_type"], ""),
         ]
-        return super(WaterSlideImageCreateView, self).dispatch(request, *args, **kwargs)
+        return super(WaterSlideImageDetailView, self).dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(*args, **kwargs)
+    def get_queryset(self):
         self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
         if self.kwargs["image_type"] not in ["smartphone", "brightfield"]:
             raise Http404(
@@ -235,10 +239,27 @@ class WaterSlideImageDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, Detai
             raise Http404(
                 f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
             )
-        context["slide"] = get_object_or_404(
-            Slide,
-            water_sample=water_sample,
-            slide_number=int(self.kwargs["slide_number"]),
+        db_image_type = "B" if self.kwargs["image_type"] == "brightfield" else "S"
+
+        slide = Slide.objects.get(
+            water_sample=water_sample, slide_number=self.kwargs["slide_number"]
+        )
+        return SlideImage.objects.all().filter(
+            slide=slide,
+            image_type=db_image_type,
+        )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        self.kwargs["slide_number"] = int(self.kwargs["slide_number"])
+        try:
+            water_sample = Water.objects.get(sample_id=self.kwargs["sample_id"])
+        except Water.DoesNotExist:
+            raise Http404(
+                f"Sample {self.kwargs['sample_id']} is not valid. Please make sure you used the correct sample id."
+            )
+        context["slide"] = Slide.objects.get(
+            water_sample=water_sample, slide_number=self.kwargs["slide_number"]
         )
         context["image_type"] = self.kwargs["image_type"]
         context["sample_type"] = "water"

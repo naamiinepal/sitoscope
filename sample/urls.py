@@ -32,9 +32,14 @@ urlpatterns = [
         name="standard_detail",
     ),
     path(
-        "standard-samples/<str:sample_id>/<int:slide_number>/<str:image_type>",
-        standard_sample_views.standard_slide_image_details,
+        "standard-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
+        standard_sample_views.StandardSlideImageDetailView.as_view(),
         name="standard_slide_image",
+    ),
+    path(
+        "standard-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>/upload",
+        standard_sample_views.StandardSlideImageCreateView.as_view(),
+        name="standard_slide_image_upload",
     ),
     path(
         "water-samples/",

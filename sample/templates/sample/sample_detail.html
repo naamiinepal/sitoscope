@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
-
+{% load sample_extras %}
 {% block body %}
-{% with image_url="sample:"|add:sample_type|add:"_slide_image" %}
-
 <h5 class="text-center">{{ sample }}</h5>
 <div class="row">
     <div class="col"></div>
@@ -18,32 +16,42 @@
 {% endblock %}
 
 {% if slides %}
-{% for slide in slides %}
-<table class="table mt-2 table-borderless">
-    <thead class="table-light">
-        <tr>
-            <th scope="col">Slide {{ forloop.counter}}</th>
-            <th scope="col"></th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr class="text-primary">
-            <td>
-                <a class="link-primary"
-                    href="{% url image_url sample_id=sample.sample_id slide_number=slide.slide_number image_type='smartphone' %}">Smartphone</a>
-            </td>
-            <td>{{ slide.smartphone_images_count }}/15</td>
-        </tr>
-        <tr class="text-success">
-            <td>
-                <a href="{% url image_url sample_id=sample.sample_id slide_number=slide.slide_number image_type='brightfield' %}"
-                    class="link-success">Brightfield</a>
-            </td>
-            <td>{{ slide.brightfield_images_count }}/15</td>
-        </tr>
-    </tbody>
-</table>
-{% endfor %}
+    {% for slide in slides %}
+    {% if slide.smartphone_images_count == 15 %}
+        {% setvar "sample:"|add:sample_type|add:"_slide_image" as smartphone_slide_images_url %}
+    {% else %}
+        {% setvar "sample:"|add:sample_type|add:"_slide_image_upload" as smartphone_slide_images_url %}
+    {% endif %}
+
+    {% if slide.brightfield_images_count == 15 %}
+        {% setvar "sample:"|add:sample_type|add:"_slide_image" as brightfield_slide_images_url %}
+    {% else %}
+        {% setvar "sample:"|add:sample_type|add:"_slide_image_upload" as brightfield_slide_images_url %}
+    {% endif %}
+    <table class="table mt-2 table-borderless">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Slide {{ forloop.counter}}</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="text-primary">
+                <td>
+                    <a class="link-primary"
+                        href="{% url smartphone_slide_images_url sample_id=sample.sample_id slide_number=slide.slide_number image_type='smartphone' %}">Smartphone</a>
+                </td>
+                <td>{{ slide.smartphone_images_count }}/15</td>
+            </tr>
+            <tr class="text-success">
+                <td>
+                    <a href="{% url brightfield_slide_images_url sample_id=sample.sample_id slide_number=slide.slide_number image_type='brightfield' %}"
+                        class="link-success">Brightfield</a>
+                </td>
+                <td>{{ slide.brightfield_images_count }}/15</td>
+            </tr>
+        </tbody>
+    </table>
+    {% endfor %}
 {% endif %}
-{% endwith %}
 {% endblock %}
