@@ -1,0 +1,22 @@
+{% extends "sample/home.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+New Vegetable Sample
+{% endblock %}
+
+{% block body %}
+<h5>Add new vegetable sample</h5>
+<form action="{% url 'sample:vegetable_create' %}" method="post" enctype="multipart/form-data" id="form">
+    {% csrf_token %}
+    {{ address_form|crispy }}
+    {{ sample_form|crispy }}
+    <button class="btn btn-success mt-1" type="submit" id="submit-btn">Submit</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/fetchAddress.js' %}"></script>
+<script src="{% static 'js/buttonSpinner.js' %}"></script>
+{% endblock %}

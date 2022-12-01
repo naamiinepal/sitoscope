@@ -2,7 +2,11 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from sample import views
-from sample.sample_views import standard_sample_views, water_sample_views
+from sample.sample_views import (
+    standard_sample_views,
+    vegetable_sample_views,
+    water_sample_views,
+)
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
@@ -65,5 +69,30 @@ urlpatterns = [
         "water-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
         water_sample_views.WaterSlideImageDetailView.as_view(),
         name="water_slide_image",
+    ),
+    path(
+        "vegetable-samples/",
+        vegetable_sample_views.VegetableListView.as_view(),
+        name="vegetable_list",
+    ),
+    path(
+        "vegetable-samples/new/",
+        vegetable_sample_views.VegetableFormView.as_view(),
+        name="vegetable_create",
+    ),
+    path(
+        "vegetable-samples/<slug:sample_id>/",
+        vegetable_sample_views.VegetableDetailView.as_view(),
+        name="vegetable_detail",
+    ),
+    path(
+        "vegetable-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>/upload",
+        vegetable_sample_views.VegetableSlideImageCreateView.as_view(),
+        name="vegetable_slide_image_upload",
+    ),
+    path(
+        "vegetable-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
+        vegetable_sample_views.VegetableSlideImageDetailView.as_view(),
+        name="vegetable_slide_image",
     ),
 ]

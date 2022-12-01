@@ -1,0 +1,49 @@
+{% extends 'sample/sample_detail.html' %}
+
+{% block sample_detail %}
+<table class="table">
+    <tbody>
+        <tr>
+            <td>Date of collection</td>
+            <th scope="row">{{ sample.date_of_collection }}</th>
+        </tr>
+        <tr>
+            <td>Province</td>
+            <th scope="row">{{ sample.site.district.province.name }}</th>
+        </tr>
+        <tr>
+            <td>District</td>
+            <th scope="row">{{ sample.site.district.name }}</th>
+        </tr>
+        <tr>
+            <td>Municipality/GaunPalika</td>
+            <th scope="row">{{ sample.site.name }}</th>
+        </tr>
+        <tr>
+            <td>Ward</td>
+            <th scope="row">{{ sample.ward }}</th>
+        </tr>
+        <tr>
+            <td>Locality</td>
+            <th scope="row">{{ sample.locality }}</th>
+        </tr>
+        <tr>
+            <td>Vegetable Name</td>
+            <th scope="row">{{ sample.get_name_display }}</th>
+        </tr>
+        <tr>
+            <td>Vegetable Origin</td>
+            <th scope="row">{{ sample.origin }}</th>
+        </tr>
+        <tr>
+            <td>Site Image</td>
+            <th scope="row">
+                <figure class="figure">
+                    <img src="{{ sample.site_image.url }}" class="figure-img img-thumbnail rounded" alt="site image">
+                </figure>
+            </th>
+        </tr>
+    </tbody>
+</table>
+
+{% endblock %}
