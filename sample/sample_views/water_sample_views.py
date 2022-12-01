@@ -64,7 +64,7 @@ class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
             print(f"Saving sample {water_sample}")
             water_sample.save()
             for i in range(1, SLIDE_COUNT + 1):
-                slide = Slide(water_sample=water_sample, slide_number=i + 1)
+                slide = Slide(water_sample=water_sample, slide_number=i)
                 slide.save()
                 for j in range(1, IMAGE_COUNT + 1):
                     for image_type, _ in IMAGE_TYPE_CHOICES:
