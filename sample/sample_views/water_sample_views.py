@@ -21,11 +21,10 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-class WaterListView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class WaterListView(LoginRequiredMixin, ListView):
     queryset = Water.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
-    crumbs = [("Water", reverse_lazy("sample:water_list"))]  # OR reverse_lazy
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -39,6 +38,7 @@ class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     template_name = "sample/water_sample/water_create.html"
     success_url = reverse_lazy("sample:water_list")
     crumbs = [("Water", success_url), ("New", "")]
+    add_home = False
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -95,6 +95,7 @@ class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     context_object_name = "sample"
     model = Water
     breadcrumb_use_pk = False
+    add_home = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -118,6 +119,7 @@ class WaterSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
     crumbs = [
         ("Water", reverse_lazy("sample:water_list")),
     ]  # OR reverse_lazy
+    add_home = False
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -207,6 +209,7 @@ class WaterSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListVie
         ("Water", reverse_lazy("sample:water_list")),
     ]  # OR reverse_lazy
     context_object_name = "images"
+    add_home = False
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [

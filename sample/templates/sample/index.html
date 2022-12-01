@@ -2,34 +2,26 @@
 {% load static %}
 
 {% block title %}
-Samples
+Parasitoscope Home
+{% endblock %}
+
+{% block nav %}
+<div class="row">
+    <div class="col-3">
+    </div>
+    <div class="col-6 mt-3">
+        <h1 class="text-bold mt-3">Parasitoscope</h1>
+    </div>
+    <div class="col-3"></div>
+</div>
+<div class="m-3">
+    <div class="d-grid gap-2 col-6 mx-auto dropdown">
+        <a class="btn btn-success btn-lg rounded-5" href="{% url 'user:login' %}">Log in</a>
+    </div>
+</div>
 {% endblock %}
 
 {% block body %}
-{% if user.is_authenticated %}
-<div class="container overflow-hidden text-center">
-    <p>Please select one of the samples from below.</p>
-    <div class="text-success">
-        <hr>
-    </div>
-    <div class="row gy-5">
-        <div class="col-6">
-            <a href="{% url 'sample:standard_list' %}" class="btn btn-outline-success btn-lg"
-                role="button">Standard</a>
-        </div>
-        <div class="col-6">
-            <a href="{% url 'sample:water_list' %}" class="btn btn-outline-success btn-lg"
-                role="button">Water</a>
-        </div>
-        <div class="col-6">
-            <a href="#" class="btn btn-outline-success btn-lg disabled" role="button">Vegetable</a>
-        </div>
-        <div class="col-6">
-            <a href="#" class="btn btn-outline-success btn-lg disabled" role="button">Stool</a>
-        </div>
-    </div>
-</div>
-{% else %}
 <div class="shadow p-3 mb-5 rounded bg-body">
     <div class="card-body p-2">
         <h2 class="text-center">About Project</h2>
@@ -66,6 +58,5 @@ Samples
         </div>
     </div>
 </div>
-{% endif %}
 
 {% endblock %}

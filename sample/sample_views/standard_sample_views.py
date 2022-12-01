@@ -19,11 +19,10 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-class StandardListView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class StandardListView(LoginRequiredMixin, ListView):
     queryset = Standard.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
-    crumbs = [("Standard", reverse_lazy("sample:standard_list"))]  # OR reverse_lazy
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -36,6 +35,7 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     template_name = "sample/standard_sample/standard_create.html"
     success_url = reverse_lazy("sample:standard_list")
     crumbs = [("Standard", success_url), ("New", "")]
+    add_home = False
 
     def form_valid(self, form):
         standard_sample = form.save(commit=False)
@@ -75,6 +75,7 @@ class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     context_object_name = "sample"
     model = Standard
     breadcrumb_use_pk = False
+    add_home = False
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,6 +99,7 @@ class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, Form
     crumbs = [
         ("Standard", reverse_lazy("sample:standard_list")),
     ]  # OR reverse_lazy
+    add_home = False
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -189,6 +191,7 @@ class StandardSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, List
         ("Standard", reverse_lazy("sample:standard_list")),
     ]  # OR reverse_lazy
     context_object_name = "images"
+    add_home = False
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
