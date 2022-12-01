@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block title %}
 Login
@@ -25,10 +26,10 @@ Login
             <h3 style="color:#008000;">Login</h3>
         </div>
         <div class="card-body">
-            <form action="{% url 'user:login' %}" method="post">
+            <form action="{% url 'user:login' %}" method="post" id="form">
                 {% csrf_token %}
                 {{ form|crispy }}
-                <button class="btn btn-success mt-1" type="submit">Login</button>
+                <button class="btn btn-success mt-1" type="submit" id="submit-btn">Login</button>
             </form>
         </div>
         <div class="card-footer">
@@ -40,3 +41,7 @@ Login
     </div>
 </div>
 {% endblock body %}
+
+{% block script %}
+<script src="{% static 'js/buttonSpinner.js' %}"></script>
+{% endblock %}
