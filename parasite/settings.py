@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     "address",
     "sample",
     "user",
-    "pwa",
     "view_breadcrumbs",
 ]
 
@@ -181,27 +180,3 @@ LOGGING = {
         },
     },
 }
-
-
-# PWA
-PWA_APP_NAME = "Parasitoscope"
-PWA_APP_DESCRIPTION = (
-    "AI Assisted Smartphone Microscope for automated detection of diarrhea parasites"
-)
-PWA_APP_THEME_COLOR = "#198754"
-PWA_APP_BACKGROUND_COLOR = "#ffffff"
-PWA_APP_DISPLAY = "standalone"
-PWA_APP_SCOPE = "/"
-PWA_APP_ORIENTATION = "any"
-PWA_APP_START_URL = "/"
-PWA_APP_STATUS_BAR_COLOR = "default"
-PWA_APP_ICONS = [{"src": "/static/img/icon.png", "sizes": "160x160"}]
-PWA_APP_ICONS_APPLE = [{"src": "/static/img/icon.png", "sizes": "160x160"}]
-PWA_APP_SPLASH_SCREEN = [
-    {
-        "src": "/static/img/splash-640x1136.png",
-        "media": "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
-    }
-]
-PWA_APP_DIR = "ltr"
-PWA_APP_LANG = "en-US"
