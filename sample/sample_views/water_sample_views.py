@@ -36,9 +36,9 @@ class WaterListView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
 class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     sample_form_class = WaterForm
     address_form_class = AddressForm
-    context_object_name = "latest_samples_list"
     template_name = "sample/water_sample/water_create.html"
-    crumbs = [("Water", reverse_lazy("sample:water_list")), ("New", "")]
+    success_url = reverse_lazy("sample:water_list")
+    crumbs = [("Water", success_url), ("New", "")]
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -63,23 +63,23 @@ class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
             )
             print(f"Saving sample {water_sample}")
             water_sample.save()
-            for i in range(SLIDE_COUNT):
+            for i in range(1, SLIDE_COUNT + 1):
                 slide = Slide(water_sample=water_sample, slide_number=i + 1)
                 slide.save()
-                for j in range(IMAGE_COUNT):
+                for j in range(1, IMAGE_COUNT + 1):
                     for image_type, _ in IMAGE_TYPE_CHOICES:
                         slide_image = SlideImage(
                             uploaded_by=water_sample.user,
                             slide=slide,
                             image="",
                             image_type=image_type,
-                            image_id=f"{water_sample}_S{i+1}_I{j+1}_{image_type}",
-                            image_number=j + 1,
+                            image_id=f"{water_sample}_S{i}_I{j}_{image_type}",
+                            image_number=j,
                         )
                         slide_image.save()
             print(f"Finished creating sample {water_sample}")
             messages.success(request, f"Added new water sample {water_sample}.")
-            return redirect("sample:water_list")
+            return redirect(self.success_url)
 
         return render(
             request,
