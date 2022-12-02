@@ -11,3 +11,10 @@ class AddressForm(forms.Form):
     )
     ward = forms.IntegerField(initial=1, min_value=1, max_value=32, required=False)
     locality = forms.CharField(max_length=500, required=False)
+
+    def __init__(self, *args, **kwargs):
+        hide_condition = kwargs.pop("anonymous", None)
+        super(AddressForm, self).__init__(*args, **kwargs)
+        if hide_condition:
+            del self.fields["ward"]
+            del self.fields["locality"]

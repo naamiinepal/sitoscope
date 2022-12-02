@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from sample import views
 from sample.sample_views import (
     standard_sample_views,
+    stool_sample_views,
     vegetable_sample_views,
     water_sample_views,
 )
@@ -94,5 +95,30 @@ urlpatterns = [
         "vegetable-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
         vegetable_sample_views.VegetableSlideImageDetailView.as_view(),
         name="vegetable_slide_image",
+    ),
+    path(
+        "stool-samples/",
+        stool_sample_views.StoolListView.as_view(),
+        name="stool_list",
+    ),
+    path(
+        "stool-samples/new/",
+        stool_sample_views.StoolFormView.as_view(),
+        name="stool_create",
+    ),
+    path(
+        "stool-samples/<slug:sample_id>/",
+        stool_sample_views.StoolDetailView.as_view(),
+        name="stool_detail",
+    ),
+    path(
+        "stool-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>/upload",
+        stool_sample_views.StoolSlideImageCreateView.as_view(),
+        name="stool_slide_image_upload",
+    ),
+    path(
+        "stool-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
+        stool_sample_views.StoolSlideImageDetailView.as_view(),
+        name="stool_slide_image",
     ),
 ]
