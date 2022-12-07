@@ -5,14 +5,15 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, FormView, ListView
 from view_breadcrumbs import (
     BaseBreadcrumbMixin,
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
+
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm
@@ -22,6 +23,7 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
+@method_decorator(never_cache, name="dispatch")
 class StoolListView(LoginRequiredMixin, ListView):
     queryset = Stool.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
@@ -86,7 +88,8 @@ class StoolFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
             {"sample_form": sample_form, "address_form": address_form},
         )
 
-@method_decorator(never_cache, name='dispatch')
+
+@method_decorator(never_cache, name="dispatch")
 class StoolDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/stool_sample/stool_detail.html"
     slug_url_kwarg = "sample_id"
@@ -142,9 +145,7 @@ class StoolSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
                 "image_type": self.kwargs["image_type"],
             },
         )
-        return super(StoolSlideImageCreateView, self).dispatch(
-            request, *args, **kwargs
-        )
+        return super(StoolSlideImageCreateView, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
@@ -225,9 +226,7 @@ class StoolSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListVie
             (self.kwargs["slide_number"], ""),
             (self.kwargs["image_type"], ""),
         ]
-        return super(StoolSlideImageDetailView, self).dispatch(
-            request, *args, **kwargs
-        )
+        return super(StoolSlideImageDetailView, self).dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         self.kwargs["slide_number"] = int(self.kwargs["slide_number"])

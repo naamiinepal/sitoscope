@@ -2,11 +2,11 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
-from django.views.decorators.cache import never_cache
-from django.utils.decorators import method_decorator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, FormView, ListView
 from view_breadcrumbs import (
     BaseBreadcrumbMixin,
@@ -23,7 +23,7 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
-
+@method_decorator(never_cache, name="dispatch")
 class WaterListView(LoginRequiredMixin, ListView):
     queryset = Water.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
@@ -90,7 +90,8 @@ class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
             {"sample_form": sample_form, "address_form": address_form},
         )
 
-@method_decorator(never_cache, name='dispatch')
+
+@method_decorator(never_cache, name="dispatch")
 class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/water_sample/water_detail.html"
     slug_url_kwarg = "sample_id"

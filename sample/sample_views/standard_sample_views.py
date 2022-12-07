@@ -5,14 +5,15 @@ from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, FormView, ListView
 from view_breadcrumbs import (
     BaseBreadcrumbMixin,
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
+
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
 from sample.models import Slide, SlideImage, Standard
@@ -20,6 +21,7 @@ from sample.utils import create_sample_id
 
 
 # Create your views here
+@method_decorator(never_cache, name="dispatch")
 class StandardListView(LoginRequiredMixin, ListView):
     queryset = Standard.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
@@ -69,7 +71,7 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
         return super().form_valid(form)
 
 
-@method_decorator(never_cache, name='dispatch')
+@method_decorator(never_cache, name="dispatch")
 class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/standard_sample/standard_detail.html"
     slug_url_kwarg = "sample_id"
