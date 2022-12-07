@@ -100,3 +100,4 @@ db.sqlite3
 *.sqbpro
 *.sql
 media/
+staticfiles/
