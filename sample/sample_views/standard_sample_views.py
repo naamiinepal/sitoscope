@@ -11,7 +11,8 @@ from view_breadcrumbs import (
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
 from sample.models import Slide, SlideImage, Standard
@@ -68,6 +69,7 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
         return super().form_valid(form)
 
 
+@method_decorator(never_cache, name='dispatch')
 class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/standard_sample/standard_detail.html"
     slug_url_kwarg = "sample_id"

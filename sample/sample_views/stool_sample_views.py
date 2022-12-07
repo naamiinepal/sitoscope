@@ -11,7 +11,8 @@ from view_breadcrumbs import (
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm
@@ -85,7 +86,7 @@ class StoolFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
             {"sample_form": sample_form, "address_form": address_form},
         )
 
-
+@method_decorator(never_cache, name='dispatch')
 class StoolDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/stool_sample/stool_detail.html"
     slug_url_kwarg = "sample_id"

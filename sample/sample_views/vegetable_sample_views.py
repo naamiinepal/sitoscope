@@ -11,7 +11,8 @@ from view_breadcrumbs import (
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
-
+from django.views.decorators.cache import never_cache
+from django.utils.decorators import method_decorator
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm
@@ -88,6 +89,7 @@ class VegetableFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
         )
 
 
+@method_decorator(never_cache, name='dispatch')
 class VegetableDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     template_name = "sample/vegetable_sample/vegetable_detail.html"
     slug_url_kwarg = "sample_id"
