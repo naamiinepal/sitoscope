@@ -17,6 +17,7 @@ VEGETABLE_CHOICES = [
     ("TO", "Tomato"),
     ("RA", "Radish"),
     ("CR", "Carrot"),
+    ("SP", "Spinach"),
 ]
 
 

@@ -69,7 +69,7 @@ class Water(Sample):
     """
 
     type = models.CharField(max_length=2, choices=WATER_TYPE_CHOICES)
-    use = models.CharField(max_length=200, null=True)
+    use = models.CharField(max_length=200, null=True, blank=True)
     ward = models.PositiveSmallIntegerField(
         default=1, validators=[MinValueValidator(1), MaxValueValidator(32)]
     )
@@ -105,7 +105,7 @@ class Vegetable(Sample):
         default=1, validators=[MinValueValidator(1), MaxValueValidator(32)]
     )
     name = models.CharField(max_length=2, choices=VEGETABLE_CHOICES)
-    origin = models.CharField(max_length=200, null=True)
+    origin = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         verbose_name = "vegetable"
