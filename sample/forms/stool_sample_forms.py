@@ -7,7 +7,13 @@ from sample.models import Stool
 class StoolForm(ModelForm):
     class Meta:
         model = Stool
-        fields = ["date_of_collection", "gender", "age", "symptoms", "stool_texture"]
+        fields = [
+            "date_of_collection",
+            "gender",
+            "age",
+            "symptoms",
+            "stool_texture",
+        ]
         widgets = {
             "date_of_collection": DateInput(
                 format=(r"%Y-%m-%d"),

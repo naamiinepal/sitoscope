@@ -73,6 +73,8 @@ class Water(Sample):
     ward = models.PositiveSmallIntegerField(
         default=1, validators=[MinValueValidator(1), MaxValueValidator(32)]
     )
+    lat = models.DecimalField(max_digits=9, decimal_places=6, verbose_name="Latitude")
+    long = models.DecimalField(max_digits=9, decimal_places=6, verbose_name="Longitude")
 
     class Meta:
         verbose_name = "water"
@@ -106,6 +108,8 @@ class Vegetable(Sample):
     )
     name = models.CharField(max_length=2, choices=VEGETABLE_CHOICES)
     origin = models.CharField(max_length=200, null=True, blank=True)
+    lat = models.DecimalField(max_digits=9, decimal_places=6, verbose_name="Latitude")
+    long = models.DecimalField(max_digits=9, decimal_places=6, verbose_name="Longitude")
 
     class Meta:
         verbose_name = "vegetable"
