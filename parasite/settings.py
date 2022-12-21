@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 from pathlib import Path
 
-import environ
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,17 +20,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# reading .env file
-env = environ.Env()
-environ.Env.read_env()
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("SECRET_KEY")
+SECRET_KEY = "django-insecure-&*i92_43o6=y#(6dkob$^=!ptd4!vlp*)1s@vmejpui6k6t&j9"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG") != "False"
+DEBUG = True
 
-ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(",")
+ALLOWED_HOSTS = ["localhost", "192.168.1.111", "192.168.1.83", "192.168.1.73"]
 
 
 # Application definition
@@ -139,7 +134,7 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Authentication Url
-LOGIN_REDIRECT_URL = "user:home"
+LOGIN_REDIRECT_URL = "user:index"
 
 LOGOUT_REDIRECT_URL = "user:index"
 
@@ -161,11 +156,11 @@ MESSAGE_TAGS = {
 
 
 # CSRF
-CSRF_TRUSTED_ORIGINS = ["https://sitoscope.naamii.org.np"]
+CSRF_TRUSTED_ORIGINS = ["https://sitoscope.naamii.org.np", "http://192.168.1.111"]
 
 
 # Media
-MEDIA_ROOT = env("MEDIA_ROOT")
+MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "/media/"
 
 # Logging

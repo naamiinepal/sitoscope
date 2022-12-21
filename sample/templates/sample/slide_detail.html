@@ -18,12 +18,16 @@
 {% endif %}
 
 {% if images %}
+<div class="row">
 {% for image in images %}
-<figure class="figure">
-    <img src="{{ image.image.url }}" class="figure-img img-thumbnail rounded" alt="{{ image.image_id }}">
-    <figcaption class="figure-caption">{{ image }}</figcaption>
-</figure>
-{% endfor %}
+    <div class="col-lg-6">
+        <figure class="figure">
+            <img src="{{ image.image.url }}" class="figure-img img-thumbnail rounded" alt="{{ image.image_id }}">
+            <figcaption class="figure-caption">{{ image }}</figcaption>
+        </figure>
+    </div>
+    {% endfor %}
+</div>
 {% else %}
 <div class="alert alert-danger" role="alert">
     Images can nout be found.

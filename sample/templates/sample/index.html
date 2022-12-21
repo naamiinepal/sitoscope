@@ -5,58 +5,52 @@
 Parasitoscope Home
 {% endblock %}
 
-{% block nav %}
-<div class="row">
-    <div class="col-3">
-    </div>
-    <div class="col-6 mt-3">
-        <h1 class="text-bold mt-3">Parasitoscope</h1>
-    </div>
-    <div class="col-3"></div>
-</div>
-<div class="m-3">
-    <div class="d-grid gap-2 col-6 mx-auto dropdown">
-        <a class="btn btn-success btn-lg rounded-5" href="{% url 'user:login' %}">Log in</a>
-    </div>
-</div>
-{% endblock %}
-
 {% block body %}
-<div class="shadow p-3 mb-5 rounded bg-body">
-    <div class="card-body p-2">
-        <h2 class="text-center">About Project</h2>
-        <p style="text-align:justify;">Diarrheal diseases are one of the major causes of death and morbidity among
-            children
-            under the age of five in
-            Nepal. This disease caused by the consumption of food and water contaminated with parasites namely giardia &
-            cryptosporidium can only be prevented via detection of these parasites. Brightfield microscope mostly used
-            in the context of Nepal for these detections has not been suitable in our geographically diverse region as
-            it requires expensive lab setups, experts and other costly reagents. A low-cost alternative method for these
-            resource-constrained settings is to use a smartphone microscope that is accessible, transportable and easy
-            to use where images can be used to derive real-time automatic detection of diarrhea-causing protozoa.</p>
-    </div>
-    <div class="container text-center">
-        <div class="row">
-            <div class="col-5 p-3 align-middle">
-                <img src="{% static 'img/naamii.webp' %}" class="img-thumbnail img-fluid border border-0"
-                    alt="NAAMII Logo">
+<div class="d-grid gap-2 col-4 mx-auto m-3">
+    <a class="btn btn-success btn-lg me-2" href="{% url 'user:login' %}">Log In</a>
+</div>
+<div class="row">
+    <div class="col-lg-4"></div>
+    <div class="col-lg-4">
+            <div class="shadow p-3 mb-5 rounded bg-body">
+            <div class="card-body p-2">
+                <h2 class="text-center">About Project</h2>
+                <p style="text-align:justify;">Diarrheal diseases are one of the major causes of death and morbidity among
+                    children
+                    under the age of five in
+                    Nepal. This disease caused by the consumption of food and water contaminated with parasites namely giardia &
+                    cryptosporidium can only be prevented via detection of these parasites. Brightfield microscope mostly used
+                    in the context of Nepal for these detections has not been suitable in our geographically diverse region as
+                    it requires expensive lab setups, experts and other costly reagents. A low-cost alternative method for these
+                    resource-constrained settings is to use a smartphone microscope that is accessible, transportable and easy
+                    to use where images can be used to derive real-time automatic detection of diarrhea-causing protozoa.</p>
             </div>
-            <div class="col-7">
+            <div class="container text-center">
                 <div class="row">
-                    <div class="col p-3 align-middle">
-                        <img src="{% static 'img/lacuna.webp' %}" class="img-thumbnail img-fluid border border-0"
-                            alt="Lacuna Fund Logo">
+                    <div class="col-5 p-3 align-middle">
+                        <img src="{% static 'img/naamii.webp' %}" class="img-fluid w-100"
+                            alt="NAAMII Logo">
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col p-3 align-middle">
-                        <img src="{% static 'img/kias.webp' %}" class="img-thumbnail img-fluid border border-0"
-                            alt="KIAS Logo">
+                    <div class="col-7">
+                        <div class="row">
+                            <div class="col p-3 align-middle">
+                                <img src="{% static 'img/lacuna.webp' %}" class="img-fluid w-100"
+                                    alt="Lacuna Fund Logo">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col p-3 align-middle">
+                                <img src="{% static 'img/kias.webp' %}" class="img-fluid w-100"
+                                    alt="KIAS Logo">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+        <div class="col-lg-4"></div>
+    
 </div>
 
 {% endblock %}

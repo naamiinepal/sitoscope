@@ -1,4 +1,5 @@
 {% load view_breadcrumbs %}
+{% load static %}
 <!doctype html>
 <html lang="en">
 
@@ -26,10 +27,44 @@
 </head>
 
 <body>
+    <nav class="navbar bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'user:index' %}">
+                <img src="{% static 'img/logo.png' %}" alt="Logo" height="24" class="d-inline-block align-text-top">
+                Parasitoscope
+            </a>
+
+            {% if user.is_authenticated %}
+            <div class="dropdown">
+                <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                </a>
+
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#">{{user.username}}</a></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a class="dropdown-item" href="{% url 'user:logout' %}">
+                            Log out
+                            <i class="bi bi-box-arrow-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            
+
+                {% else %}
+                <a class="btn btn-outline-success me-2" href="{% url 'user:login' %}">Log In</a>
+
+                {% endif %}
+        
+
+        </div>
+    </nav>
     <div class="container" id="bodyContainer">
-        {% block nav %}
-        {% endblock %}
-        <hr>
         <div class="row justify-content-md-center mt-5">
             <div class="col col-lg-2">
             </div>
