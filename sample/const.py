@@ -24,6 +24,7 @@ VEGETABLE_CHOICES = [
 STANDARD_SAMPLE_TYPES = [
     ("W", "Water"),
     ("V", "Vegetable"),
+    ("S", "Stool"),
 ]
 
 
