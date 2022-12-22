@@ -49,21 +49,28 @@ def upload_samples(instance, filename):
     return filename
 
 
-def create_sample_id(sample_type, date, municipality=None, standard_type=""):
+def create_sample_id(sample_type, date, municipality=None):
     """
     Generate sample id for sample type.
     Args:
-    sample_type: ('standard', 'water', 'stool', 'vegetable')
+    sample_type: ('water', 'stool', 'vegetable')
     date: Date of sample collection
     municipality: Site of sample collection
     """
-    if sample_type == "standard":
-        if standard_type:
-            sample_type = "standard_" + standard_type
-        sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
-        return f"{sample_type.capitalize()}_{date.strftime('%Y%m%d')}_{sample_number}"
-    else:
-        site = f"{municipality.district.province.code}-{slugify(municipality.name)}"
-        sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
-        sample_type = sample_type[0].upper()
-        return f"{sample_type}_{site}_{date.strftime('%Y%m%d')}_{sample_number}"
+    site = f"{municipality.district.province.code}-{slugify(municipality.name)}"
+    sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
+    sample_type = sample_type[0].upper()
+    return f"{sample_type}_{site}_{date.strftime('%Y%m%d')}_{sample_number}"
+
+
+def create_standard_sample_id(date, standard_type, dilution_factor):
+    """
+    Generate sample id for standard sample type.
+    Args:
+    date: Date of sample collection
+    standard_type: ('water', 'vegetable', 'stool')
+    dilution_factor: Dilution factor of standard sample
+    """
+    sample_type = "Standard_" + standard_type
+    sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
+    return f"{sample_type}_{date.strftime('%Y%m%d')}_D{slugify(dilution_factor)}_{sample_number}"

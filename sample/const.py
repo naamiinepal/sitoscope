@@ -33,5 +33,7 @@ IMAGE_TYPE_CHOICES = [("S", "Smartphone"), ("B", "Brightfield")]
 # Number of slides per sample
 SLIDE_COUNT = 3
 
+STANDARD_SAMPLE_SLIDE_COUNT = 25
+
 # Number of images per slide
 IMAGE_COUNT = 15

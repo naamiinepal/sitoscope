@@ -14,10 +14,10 @@ from view_breadcrumbs import (
     DetailBreadcrumbMixin,
 )
 
-from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
+from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, STANDARD_SAMPLE_SLIDE_COUNT
 from sample.forms.standard_sample_form import SlideImagesForm, StandardForm
 from sample.models import Slide, SlideImage, Standard
-from sample.utils import create_sample_id
+from sample.utils import create_standard_sample_id
 
 
 # Create your views here
@@ -43,14 +43,16 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
     def form_valid(self, form):
         standard_sample = form.save(commit=False)
         standard_sample.user = self.request.user
-        standard_sample.sample_id = create_sample_id(
-            "standard", standard_sample.date_of_collection, standard_type=standard_sample.sample_type
+        standard_sample.sample_id = create_standard_sample_id(
+            standard_sample.date_of_collection,
+            standard_sample.sample_type,
+            standard_sample.dilution_factor,
         )
         print(f"Saving sample {standard_sample}")
         standard_sample.save()
 
         # Create Slides and SlideImage entries in the database
-        for i in range(1, SLIDE_COUNT + 1):
+        for i in range(1, STANDARD_SAMPLE_SLIDE_COUNT + 1):
             slide = Slide(standard_sample=standard_sample, slide_number=i)
             slide.save()
             for j in range(1, IMAGE_COUNT + 1):
@@ -138,9 +140,9 @@ class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, Form
             raise Http404(
                 f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
             )
-        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 25:
             raise Http404(
-                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1 to 25)"
             )
         try:
             standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
@@ -220,9 +222,9 @@ class StandardSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, List
             raise Http404(
                 f"Image type {self.kwargs['image_type']} is not valid. Please use alid image types: ('smartphone', 'brightfield)"
             )
-        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 3:
+        if self.kwargs["slide_number"] < 1 or self.kwargs["slide_number"] > 25:
             raise Http404(
-                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1, 2, 3)"
+                f"Slide number {self.kwargs['slide_number']} is not valid. Valid slide numbers: (1 to 25)"
             )
         try:
             standard_sample = Standard.objects.get(sample_id=self.kwargs["sample_id"])
