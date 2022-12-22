@@ -49,7 +49,7 @@ def upload_samples(instance, filename):
     return filename
 
 
-def create_sample_id(sample_type, date, municipality=None):
+def create_sample_id(sample_type, date, municipality=None, standard_type=""):
     """
     Generate sample id for sample type.
     Args:
@@ -58,8 +58,10 @@ def create_sample_id(sample_type, date, municipality=None):
     municipality: Site of sample collection
     """
     if sample_type == "standard":
+        if standard_type:
+            sample_type = "standard_" + standard_type
         sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)
-        return f"Standard_{date.strftime('%Y%m%d')}_{sample_number}"
+        return f"{sample_type.capitalize()}_{date.strftime('%Y%m%d')}_{sample_number}"
     else:
         site = f"{municipality.district.province.code}-{slugify(municipality.name)}"
         sample_number = nanoid.generate("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", 5)

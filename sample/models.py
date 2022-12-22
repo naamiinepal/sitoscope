@@ -8,6 +8,7 @@ from address.models import Municipality
 from sample.const import (
     GENDER_CHOICES,
     IMAGE_TYPE_CHOICES,
+    STANDARD_SAMPLE_TYPES,
     VEGETABLE_CHOICES,
     WATER_TYPE_CHOICES,
 )
@@ -49,11 +50,12 @@ class Standard(models.Model):
         verbose_name="Created By",
     )
     date_of_collection = models.DateField(default=date.today)
+    sample_type = models.CharField(max_length=1, choices=STANDARD_SAMPLE_TYPES)
     sample_id = models.CharField(max_length=500, unique=True)
     matrix = models.CharField(max_length=200)
-    dilution_factor = models.DecimalField(max_digits=10, decimal_places=8)
-    expected_concentration = models.DecimalField(max_digits=10, decimal_places=8)
-    observed_concentration = models.DecimalField(max_digits=10, decimal_places=8)
+    dilution_factor = models.DecimalField(max_digits=10, decimal_places=6)
+    expected_concentration = models.DecimalField(max_digits=10, decimal_places=6)
+    observed_concentration = models.DecimalField(max_digits=10, decimal_places=6)
 
     class Meta:
         verbose_name = "standard"

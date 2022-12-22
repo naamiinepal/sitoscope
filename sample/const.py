@@ -21,6 +21,11 @@ VEGETABLE_CHOICES = [
     ("CH", "Chilli"),
 ]
 
+STANDARD_SAMPLE_TYPES = [
+    ("W", "Water"),
+    ("V", "Vegetable"),
+]
+
 
 IMAGE_TYPE_CHOICES = [("S", "Smartphone"), ("B", "Brightfield")]
 

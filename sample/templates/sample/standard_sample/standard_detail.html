@@ -8,6 +8,10 @@
             <th scope="row">{{ sample.date_of_collection }}</th>
         </tr>
         <tr>
+            <td>Type</td>
+            <th scope="row">{{ sample.get_sample_type_display }}</th>
+        </tr>
+        <tr>
             <td>Matrix</td>
             <th scope="row">{{ sample.matrix }}</th>
         </tr>

@@ -10,6 +10,7 @@ class StandardForm(ModelForm):
         model = Standard
         fields = [
             "date_of_collection",
+            "sample_type",
             "matrix",
             "dilution_factor",
             "expected_concentration",
@@ -34,7 +35,7 @@ class SlideImagesForm(Form):
     )
 
     def clean_images(self):
-        files = self.files.getlist('images')
+        files = self.files.getlist("images")
         if len(files) != 15:
             raise forms.ValidationError("Please upload exactly 15 images.")
         return files

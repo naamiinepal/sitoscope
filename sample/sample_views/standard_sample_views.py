@@ -44,7 +44,7 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
         standard_sample = form.save(commit=False)
         standard_sample.user = self.request.user
         standard_sample.sample_id = create_sample_id(
-            "standard", standard_sample.date_of_collection
+            "standard", standard_sample.date_of_collection, standard_type=standard_sample.sample_type
         )
         print(f"Saving sample {standard_sample}")
         standard_sample.save()
