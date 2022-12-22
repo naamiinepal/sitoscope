@@ -53,9 +53,9 @@ class Standard(models.Model):
     sample_type = models.CharField(max_length=1, choices=STANDARD_SAMPLE_TYPES)
     sample_id = models.CharField(max_length=500, unique=True)
     matrix = models.CharField(max_length=200)
-    dilution_factor = models.DecimalField(max_digits=10, decimal_places=6)
-    expected_concentration = models.DecimalField(max_digits=10, decimal_places=6)
-    observed_concentration = models.DecimalField(max_digits=10, decimal_places=6)
+    dilution_factor = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    expected_concentration = models.DecimalField(max_digits=10, decimal_places=4)
+    observed_concentration = models.DecimalField(max_digits=10, decimal_places=4)
 
     class Meta:
         verbose_name = "standard"
