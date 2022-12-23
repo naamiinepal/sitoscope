@@ -195,6 +195,7 @@ class SlideImage(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         verbose_name="uploaded by",
+        related_name="uploaded_by",
     )
 
     slide = models.ForeignKey(
@@ -211,6 +212,15 @@ class SlideImage(models.Model):
     image_type = models.CharField(max_length=1, choices=IMAGE_TYPE_CHOICES, default="S")
 
     created_at = models.DateTimeField(auto_now=True)
+
+    approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="approved_by",
+    )
 
     class Meta:
         constraints = [

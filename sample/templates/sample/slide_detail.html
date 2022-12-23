@@ -19,19 +19,33 @@
 
 {% if images %}
 <div class="row">
-{% for image in images %}
+    {% for image in images %}
     <div class="col-lg-6">
-        <figure class="figure">
-            <img src="{{ image.image.url }}" class="figure-img img-thumbnail rounded" alt="{{ image.image_id }}">
-            <figcaption class="figure-caption">{{ image }}</figcaption>
-        </figure>
+        <div class="card m-2">
+            <img src="{{ image.image.url }}" class="img-thumbnail rounded card-img card-img-top"
+                alt="{{ image.image_id }}">
+            <div class="card-body text-center">
+                <small class="card-text">{{image}}</small>
+                {% if image.approved %}
+                <span class="badge text-success">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Approved
+                </span>
+                {% else %}
+                <span class="badge text-danger">
+                    <i class="bi bi-x-circle-fill"></i>
+                    Not Approved
+                </span>
+                {% endif %}
+            </div>
+        </div>
     </div>
     {% endfor %}
 </div>
 {% else %}
 <div class="alert alert-danger" role="alert">
-    Images can nout be found.
-  </div>
+    Images can nost be found.
+</div>
 
 {% endif %}
 {% endwith %}
