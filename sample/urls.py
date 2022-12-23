@@ -15,6 +15,7 @@ router.register(r"standard", views.StandardViewSetAPI, basename="standard")
 router.register(r"water", views.WaterViewSetAPI, basename="water")
 router.register(r"vegetable", views.VegetableViewSetAPI, basename="vegetable")
 router.register(r"stool", views.StoolViewSetAPI, basename="stool")
+router.register(r"slideimage", views.SlideImageViewSetAPI, basename="slideimage")
 
 
 # The API URLs are now determined automatically by the router.

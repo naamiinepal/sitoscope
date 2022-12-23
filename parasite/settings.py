@@ -157,7 +157,8 @@ MESSAGE_TAGS = {
 
 # CSRF
 CSRF_TRUSTED_ORIGINS = ["https://sitoscope.naamii.org.np", "http://192.168.1.111"]
-
+CSRF_COOKIE_HTTPONLY = True
+CSRF_USE_SESSIONS = True
 
 # Media
 MEDIA_ROOT = BASE_DIR / "media"

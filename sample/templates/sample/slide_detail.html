@@ -2,6 +2,8 @@
 {% load crispy_forms_tags %}
 {% load static %}
 {% block body %}
+{% csrf_token %}
+
 {% with upload_url="sample:"|add:sample_type|add:"_slide_image" %}
 {% if image_type == 'smartphone' %}
 <h4 class="text-primary">{{ image_type|title }}</h4>
@@ -23,19 +25,36 @@
     <div class="col-lg-6">
         <div class="card m-2">
             <img src="{{ image.image.url }}" class="img-thumbnail rounded card-img card-img-top"
-                alt="{{ image.image_id }}">
+                alt="{{ image.image_id }}" id="{{ image.image_id }}">
             <div class="card-body text-center">
-                <small class="card-text">{{image}}</small>
                 {% if image.approved %}
-                <span class="badge text-success">
-                    <i class="bi bi-check-circle-fill"></i>
-                    Approved
-                </span>
+                <div id="div-{{ image.image_id }}">
+                    <small class="card-text text-success">{{image}} {{image.id}}</small>
+                    <span class="badge text-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Approved
+                    </span>
+                    {% if perms.sample.change_slideimage %}
+                    <div>
+                        <button type="button" class="btn btn-outline-danger btn-sm reject-btn"
+                            id="reject-btn-{{image.id}}">Reject</button>
+                    </div>
+                    {% endif %}
+                </div>
                 {% else %}
-                <span class="badge text-danger">
-                    <i class="bi bi-x-circle-fill"></i>
-                    Not Approved
-                </span>
+                <div id="div-{{ image.image_id }}">
+                    <small class="card-text text-danger">{{image}} {{image.id}}</small>
+                    <span class="badge text-danger">
+                        <i class="bi bi-x-circle-fill"></i>
+                        Not Approved
+                    </span>
+                    {% if perms.sample.change_slideimage %}
+                    <div>
+                        <button type="button" class="btn btn-outline-success btn-sm approve-btn"
+                            id="approve-btn-{{image.id}}">Approve</button>
+                    </div>
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
         </div>
@@ -49,10 +68,36 @@
 
 {% endif %}
 {% endwith %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast align-items-center text-bg-success border-0" id="approvedToast" class="toast" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Approve Image</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>      
+        <div class="toast-body">
+            The image has been successfully approved.
+        </div>
+    </div>
+    <div class="toast align-items-center text-bg-danger border-0" id="rejectedToast" class="toast" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Reject Image</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+      
+        <div class="toast-body">
+            The image has been rejected.
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 
 {% block script %}
 <script src="{% static 'js/buttonSpinner.js' %}"></script>
+<script src="{% static 'js/approveOrReject.js' %}"></script>
+
 
 {% endblock %}
