@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
@@ -24,10 +24,11 @@ from sample.utils import create_sample_id
 
 # Create your views here
 @method_decorator(never_cache, name="dispatch")
-class StoolListView(LoginRequiredMixin, ListView):
+class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     queryset = Stool.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    permission_required = "sample.view_stool"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,13 +36,16 @@ class StoolListView(LoginRequiredMixin, ListView):
         return context
 
 
-class StoolFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
+class StoolFormView(
+    LoginRequiredMixin, PermissionRequiredMixin, CreateBreadcrumbMixin, FormView
+):
     sample_form_class = StoolForm
     address_form_class = AddressForm
     template_name = "sample/stool_sample/stool_create.html"
     success_url = reverse_lazy("sample:stool_list")
     crumbs = [("Stool", success_url), ("New", "")]
     add_home = False
+    permission_required = "sample.add_stool"
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -90,7 +94,9 @@ class StoolFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
 
 
 @method_decorator(never_cache, name="dispatch")
-class StoolDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+class StoolDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, DetailBreadcrumbMixin, DetailView
+):
     template_name = "sample/stool_sample/stool_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
@@ -98,6 +104,7 @@ class StoolDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     model = Stool
     breadcrumb_use_pk = False
     add_home = False
+    permission_required = "sample.view_stool"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -114,7 +121,9 @@ class StoolDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
         return context
 
 
-class StoolSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
+class StoolSlideImageCreateView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, FormView
+):
     template_name = "sample/slide_create.html"
     form_class = SlideImagesForm
     success_url = reverse_lazy("sample:stool_list")
@@ -122,6 +131,7 @@ class StoolSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
         ("Stool", reverse_lazy("sample:stool_list")),
     ]  # OR reverse_lazy
     add_home = False
+    permission_required = ("sample.add_stool", "sample.add_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -204,7 +214,9 @@ class StoolSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
         return super().form_valid(form)
 
 
-class StoolSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class StoolSlideImageDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, ListView
+):
     template_name = "sample/slide_detail.html"
     breadcrumb_use_pk = False
     crumbs = [
@@ -212,6 +224,7 @@ class StoolSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListVie
     ]  # OR reverse_lazy
     context_object_name = "images"
     add_home = False
+    permission_required = ("sample.view_stool", "sample.view_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [

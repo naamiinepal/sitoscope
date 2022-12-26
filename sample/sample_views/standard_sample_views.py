@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
@@ -22,10 +22,11 @@ from sample.utils import create_standard_sample_id
 
 # Create your views here
 @method_decorator(never_cache, name="dispatch")
-class StandardListView(LoginRequiredMixin, ListView):
+class StandardListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     queryset = Standard.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    permission_required = "sample.view_standard"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -33,12 +34,15 @@ class StandardListView(LoginRequiredMixin, ListView):
         return context
 
 
-class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
+class StandardFormView(
+    LoginRequiredMixin, PermissionRequiredMixin, CreateBreadcrumbMixin, FormView
+):
     form_class = StandardForm
     template_name = "sample/standard_sample/standard_create.html"
     success_url = reverse_lazy("sample:standard_list")
     crumbs = [("Standard", success_url), ("New", "")]
     add_home = False
+    permission_required = ("sample.add_standard", "sample.change_standard")
 
     def form_valid(self, form):
         standard_sample = form.save(commit=False)
@@ -74,7 +78,9 @@ class StandardFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
 
 
 @method_decorator(never_cache, name="dispatch")
-class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+class StandardDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, DetailBreadcrumbMixin, DetailView
+):
     template_name = "sample/standard_sample/standard_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
@@ -82,6 +88,7 @@ class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     model = Standard
     breadcrumb_use_pk = False
     add_home = False
+    permission_required = "sample.view_standard"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,7 +105,9 @@ class StandardDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
         return context
 
 
-class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
+class StandardSlideImageCreateView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, FormView
+):
     template_name = "sample/slide_create.html"
     form_class = SlideImagesForm
     success_url = reverse_lazy("sample:standard_list")
@@ -106,6 +115,7 @@ class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, Form
         ("Standard", reverse_lazy("sample:standard_list")),
     ]  # OR reverse_lazy
     add_home = False
+    permission_required = ("sample.add_standard", "sample.add_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -190,7 +200,9 @@ class StandardSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, Form
         return super().form_valid(form)
 
 
-class StandardSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class StandardSlideImageDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, ListView
+):
     template_name = "sample/slide_detail.html"
     breadcrumb_use_pk = False
     crumbs = [
@@ -198,6 +210,7 @@ class StandardSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, List
     ]  # OR reverse_lazy
     context_object_name = "images"
     add_home = False
+    permission_required = ("sample.view_standard", "sample.view_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [

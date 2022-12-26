@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
@@ -24,10 +24,11 @@ from sample.utils import create_sample_id
 
 # Create your views here
 @method_decorator(never_cache, name="dispatch")
-class WaterListView(LoginRequiredMixin, ListView):
+class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     queryset = Water.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    permission_required = "sample.view_water"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,13 +36,16 @@ class WaterListView(LoginRequiredMixin, ListView):
         return context
 
 
-class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
+class WaterFormView(
+    LoginRequiredMixin, PermissionRequiredMixin, CreateBreadcrumbMixin, FormView
+):
     sample_form_class = WaterForm
     address_form_class = AddressForm
     template_name = "sample/water_sample/water_create.html"
     success_url = reverse_lazy("sample:water_list")
     crumbs = [("Water", success_url), ("New", "")]
     add_home = False
+    permission_required = "sample.add_water"
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -92,7 +96,9 @@ class WaterFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
 
 
 @method_decorator(never_cache, name="dispatch")
-class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+class WaterDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, DetailBreadcrumbMixin, DetailView
+):
     template_name = "sample/water_sample/water_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
@@ -100,6 +106,7 @@ class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
     model = Water
     breadcrumb_use_pk = False
     add_home = False
+    permission_required = "sample.view_water"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -116,7 +123,9 @@ class WaterDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
         return context
 
 
-class WaterSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
+class WaterSlideImageCreateView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, FormView
+):
     template_name = "sample/slide_create.html"
     form_class = SlideImagesForm
     success_url = reverse_lazy("sample:water_list")
@@ -124,6 +133,7 @@ class WaterSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
         ("Water", reverse_lazy("sample:water_list")),
     ]  # OR reverse_lazy
     add_home = False
+    permission_required = ("sample.add_water", "sample.add_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -206,7 +216,9 @@ class WaterSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormVie
         return super().form_valid(form)
 
 
-class WaterSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class WaterSlideImageDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, ListView
+):
     template_name = "sample/slide_detail.html"
     breadcrumb_use_pk = False
     crumbs = [
@@ -214,6 +226,7 @@ class WaterSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListVie
     ]  # OR reverse_lazy
     context_object_name = "images"
     add_home = False
+    permission_required = ("sample.view_water", "sample.view_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [

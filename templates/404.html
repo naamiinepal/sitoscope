@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="alert alert-warning" role="alert">
+    <p class="display-4">
+        400 Bad Request
+    </p>
+    <span>
+        <p>
+            Uh oh, it looks like something's gone awry with your request. Don't worry, it's not you, it's us (well,
+            actually
+            it
+            could be you, but we'll give you the benefit of the doubt).
+        </p>
+
+        <p>
+            If you're seeing this message, it means there's a problem with the request you sent to our server. But fear
+            not!
+            All is
+            not lost. We just need a little more information from you to get things sorted out.
+        </p>
+
+        <p>
+            So please double check the format of your request and make sure you've included all the necessary
+            parameters. If
+            you're
+            still having trouble, give our friendly support team a shout. They'll be happy to help you out and get you
+            back
+            on
+            track.
+        </p>
+
+        <p>
+
+            And remember, if at first you don't succeed, try, try again!
+        </p>
+    </span>
+    <a href="{% url 'user:index' %}" class="btn btn-primary">Back to Home</a>
+</div>
+
+{% endblock %}

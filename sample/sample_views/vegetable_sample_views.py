@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
 from django.db.models import Q
 from django.http import Http404
@@ -24,10 +24,11 @@ from sample.utils import create_sample_id
 
 # Create your views here
 @method_decorator(never_cache, name="dispatch")
-class VegetableListView(LoginRequiredMixin, ListView):
+class VegetableListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     queryset = Vegetable.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
+    permission_required = "sample.view_vegetable"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,13 +36,16 @@ class VegetableListView(LoginRequiredMixin, ListView):
         return context
 
 
-class VegetableFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
+class VegetableFormView(
+    LoginRequiredMixin, PermissionRequiredMixin, CreateBreadcrumbMixin, FormView
+):
     sample_form_class = VegetableForm
     address_form_class = AddressForm
     template_name = "sample/vegetable_sample/vegetable_create.html"
     success_url = reverse_lazy("sample:vegetable_list")
     crumbs = [("Vegetable", success_url), ("New", "")]
     add_home = False
+    permission_required = "sample.add_vegetable"
 
     def get(self, request, *args, **kwargs):
         sample_form = self.sample_form_class()
@@ -92,7 +96,9 @@ class VegetableFormView(LoginRequiredMixin, CreateBreadcrumbMixin, FormView):
 
 
 @method_decorator(never_cache, name="dispatch")
-class VegetableDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView):
+class VegetableDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, DetailBreadcrumbMixin, DetailView
+):
     template_name = "sample/vegetable_sample/vegetable_detail.html"
     slug_url_kwarg = "sample_id"
     slug_field = "sample_id"
@@ -100,6 +106,7 @@ class VegetableDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView)
     model = Vegetable
     breadcrumb_use_pk = False
     add_home = False
+    permission_required = "sample.view_vegetable"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -116,7 +123,9 @@ class VegetableDetailView(LoginRequiredMixin, DetailBreadcrumbMixin, DetailView)
         return context
 
 
-class VegetableSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, FormView):
+class VegetableSlideImageCreateView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, FormView
+):
     template_name = "sample/slide_create.html"
     form_class = SlideImagesForm
     success_url = reverse_lazy("sample:vegetable_list")
@@ -124,6 +133,7 @@ class VegetableSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, For
         ("Vegetable", reverse_lazy("sample:vegetable_list")),
     ]  # OR reverse_lazy
     add_home = False
+    permission_required = ("sample.add_vegetable", "sample.add_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [
@@ -208,7 +218,9 @@ class VegetableSlideImageCreateView(LoginRequiredMixin, BaseBreadcrumbMixin, For
         return super().form_valid(form)
 
 
-class VegetableSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, ListView):
+class VegetableSlideImageDetailView(
+    LoginRequiredMixin, PermissionRequiredMixin, BaseBreadcrumbMixin, ListView
+):
     template_name = "sample/slide_detail.html"
     breadcrumb_use_pk = False
     crumbs = [
@@ -216,6 +228,7 @@ class VegetableSlideImageDetailView(LoginRequiredMixin, BaseBreadcrumbMixin, Lis
     ]  # OR reverse_lazy
     context_object_name = "images"
     add_home = False
+    permission_required = ("sample.view_vegetable", "sample.view_slideimage")
 
     def dispatch(self, request, *args, **kwargs):
         self.crumbs = [

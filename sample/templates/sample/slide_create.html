@@ -18,6 +18,7 @@
 {% endif %}
 
 <div>
+    {% if perms.sample.add_slideimage %}
     <span>
         <form action="{% url upload_url sample_id=sample_id slide_number=slide.slide_number image_type=image_type %}"
             method="post" class="form-inline" enctype="multipart/form-data" id="form">
@@ -26,6 +27,11 @@
             <button type="submit" class="btn btn-success mt-1" type="submit" id="submit-btn">Submit</button>
         </form>
     </span>
+    {% else %}
+    <span>
+        <p class="display-4">No images to show.</p>
+    </span>
+    {% endif %}
 </div>
 {% endwith %}
 {% endblock %}

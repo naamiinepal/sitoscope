@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="alert alert-warning" role="alert">
+    <p class="display-4">
+        403 Forbidden
+    </p>
+    <span>
+        <p>
+            Whoopsie daisy! It looks like you've stumbled upon a restricted area. Don't worry, it's not because we don't
+            like you or anything. We just can't have just anyone poking around and potentially causing chaos (we've all
+            seen
+            what happens when people without proper supervision get their hands on advanced technology, right?).
+        </p>
+
+        <p>
+            But don't despair! If you're really set on getting access to this exclusive club, we might be able to make
+            an
+            exception. Just make us laugh with your best joke and we'll consider letting you in. But be warned: our
+            standards for humor are pretty high. If your joke falls flat, you'll have to turn back and try again another
+            day. Good luck!
+        </p>
+    </span>
+    <a href="{% url 'user:index' %}" class="btn btn-primary">Back to Home</a>
+</div>
+{% endblock %}
