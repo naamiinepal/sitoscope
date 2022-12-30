@@ -25,7 +25,7 @@
     <div class="col-lg-6">
         <div class="card m-2">
             <img src="{{ image.image.url }}" class="img-thumbnail rounded card-img card-img-top"
-                alt="{{ image.image_id }}" id="{{ image.image_id }}" width="500">
+                alt="{{ image.image_id }}" id="{{ image.image_id }}" width="640" height="480">
             <div class="card-body text-center">
                 {% if image.approved %}
                 <div id="div-{{ image.image_id }}">
@@ -74,7 +74,7 @@
         <div class="toast-header">
             <strong class="me-auto">Approve Image</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>      
+        </div>
         <div class="toast-body">
             The image has been successfully approved.
         </div>
@@ -84,8 +84,8 @@
         <div class="toast-header">
             <strong class="me-auto">Reject Image</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-      
+        </div>
+
         <div class="toast-body">
             The image has been rejected.
         </div>
