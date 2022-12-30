@@ -16,13 +16,18 @@ def upload_samples(instance, filename):
         Sample_Type, Site, Date, Sample ID, Slide Number and Image ID
 
     """
+    splitted = filename.rsplit(".", 1)
+    ext = "jpg" if len(splitted) == 1 else splitted[1]
+
     slide_number = instance.slide.slide_number
     image_number = instance.image_id
     if instance.slide.standard_sample:
         sample_type = "standard"
         date = instance.slide.standard_sample.date_of_collection
         sample_id = instance.slide.standard_sample.sample_id
-        filename = f"{sample_type}/{date}/{sample_id}/{slide_number}/{image_number}.jpg"
+        filename = (
+            f"{sample_type}/{date}/{sample_id}/{slide_number}/{image_number}.{ext}"
+        )
     else:
         if instance.slide.water_sample:
             sample_type = "water"
@@ -39,9 +44,7 @@ def upload_samples(instance, filename):
             site = instance.slide.vegetable_sample.site
             date = instance.slide.vegetable_sample.date_of_collection
             sample_id = instance.slide.vegetable_sample.sample_id
-        filename = (
-            f"{sample_type}/{site}/{date}/{sample_id}/{slide_number}/{image_number}.jpg"
-        )
+        filename = f"{sample_type}/{site}/{date}/{sample_id}/{slide_number}/{image_number}.{ext}"
     fullname = os.path.join(settings.MEDIA_ROOT, filename)
     print(fullname)
     if os.path.exists(fullname):
