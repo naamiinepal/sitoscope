@@ -6,25 +6,49 @@ import argparse
 import os
 from glob import glob
 import time
+from typing import Iterable
 
 import cv2
 
 import concurrent.futures
 
 
+EXTENSIONS = ["jpg", "png"]
+
+
 def brightfield_img_to_png(brightfield_img_path: str):
     print("Working on:", brightfield_img_path)
 
     # Read the brightfield image
+    basename, ext = brightfield_img_path.rsplit(".", 1)
+
+    # try:
     img = cv2.imread(brightfield_img_path)
+    # except Exception:
+    #     index = EXTENSIONS.index(ext)
+    #     brightfield_img_path = f"{basename}.{EXTENSIONS[index ^ 1]}"
+    #     img = cv2.imread(brightfield_img_path)
 
     # Convert the image to .png format
+
+    write_path = f"{basename}.png"
     cv2.imwrite(
-        brightfield_img_path.rsplit(".", 1)[0] + ".png",
+        write_path,
         img,
         [cv2.IMWRITE_PNG_COMPRESSION, 9],
     )
-    os.remove(brightfield_img_path)
+
+    if write_path != brightfield_img_path:
+        os.remove(brightfield_img_path)
+
+
+def parallel_brightfield_to_png(brightfield_imgs: Iterable[str]):
+
+    start = time.time()
+    with concurrent.futures.ProcessPoolExecutor() as executor:
+        executor.map(brightfield_img_to_png, brightfield_imgs)
+
+    print("\n\nElapsed time:", time.time() - start, end="\n\n")
 
 
 def main(args):
@@ -33,12 +57,7 @@ def main(args):
     # Get the list of brightfield images
     brightfield_imgs = glob(f"{brightfield_img_path}/**/*_B.jpg", recursive=True)
 
-    start = time.time()
-
-    with concurrent.futures.ProcessPoolExecutor() as executor:
-        executor.map(brightfield_img_to_png, brightfield_imgs)
-
-    print("\n\nElapsed time:", time.time() - start, end="\n\n")
+    parallel_brightfield_to_png(brightfield_imgs)
 
 
 if __name__ == "__main__":
