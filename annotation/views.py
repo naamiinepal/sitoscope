@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 
 from annotation.models import Annotation, Annotator
@@ -17,6 +18,7 @@ from .const import LABELS
 
 # only show the annotation home page if the user is an annotator
 @login_required
+@never_cache
 def annotation_home(request: HttpRequest):
     try:
         Annotator.objects.get(user=request.user)
