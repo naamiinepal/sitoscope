@@ -14,20 +14,32 @@ Samples
     </div>
     <div class="row gy-5">
         <div class="col-6">
-            <a href="{% url 'sample:standard_list' %}" class="btn btn-outline-success btn-lg"
-                role="button">Standard</a>
+            <a href="{% url 'sample:standard_list' %}" class="btn btn-outline-success btn-lg" role="button">Standard</a>
         </div>
         <div class="col-6">
-            <a href="{% url 'sample:water_list' %}" class="btn btn-outline-success btn-lg"
-                role="button">Water</a>
+            <a href="{% url 'sample:water_list' %}" class="btn btn-outline-success btn-lg" role="button">Water</a>
         </div>
         <div class="col-6">
-            <a href="{% url 'sample:vegetable_list' %}" class="btn btn-outline-success btn-lg" role="button">Vegetable</a>
+            <a href="{% url 'sample:vegetable_list' %}" class="btn btn-outline-success btn-lg"
+                role="button">Vegetable</a>
         </div>
         <div class="col-6">
             <a href="{% url 'sample:stool_list' %}" class="btn btn-outline-success btn-lg" role="button">Stool</a>
         </div>
     </div>
+    {% if is_annotator %}
+    <hr>
+        <div class="card">
+            <div class="card-body">
+                <p>Hello there, Annotator.</p>
+                <div class="container">
+                    <a href="{% url 'annotation:annotation_home' %}" class="btn btn-lg btn-primary">
+                        Go To Annotation Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 
 {% endblock %}

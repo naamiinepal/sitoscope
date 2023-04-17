@@ -1,4 +1,5 @@
 import django
+from django.db.models import Q
 
 django.setup()
 
@@ -11,9 +12,10 @@ def assign_annotations():
     annotators = Annotator.objects.all()
     for image_type in IMAGE_TYPE_CHOICES:
         slide_images = SlideImage.objects.filter(
-            image__isnull=False,
+            ~Q(image=""),
             image_type=image_type[0],
         )
+        # print(slide_images)
         for i, annotator in enumerate(annotators):
             print(f"Assigning annotations for {annotator}")
             assigned_images = slide_images[i :: len(annotators)]

@@ -49,9 +49,9 @@
 </head>
 
 <body>
+    {% block navbar %}
     <nav class="navbar bg-light">
         <div class="container-fluid">
-
             {% if user.is_authenticated %}
             <a class="navbar-brand" href="{% url 'user:index' %}">
                 <img src="{% static 'img/logo.png' %}" alt="Logo" width="32" height="32"
@@ -88,10 +88,10 @@
             <a class="btn btn-outline-success me-2" href="{% url 'user:login' %}">Log In</a>
 
             {% endif %}
-
-
+            
         </div>
     </nav>
+    {% endblock %}
     <div class="container" id="bodyContainer">
         <div class="row justify-content-md-center mt-5">
             <div class="col col-lg-2">

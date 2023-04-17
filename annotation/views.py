@@ -32,16 +32,29 @@ def annotation_home(request: HttpRequest):
         annotator__user=request.user, annotated=False
     ).prefetch_related("image")
 
-    annotated_images_count = annotations.count()
-    not_annotated_images_count = not_annotated_images.count()
+    # filter out smartphone and brightfield images
+    brightfield_annotated = annotations.exclude(image__image_type="S")
+    brightfield_not_annotated = not_annotated_images.exclude(image__image_type="S")
+
+    smartphone_annotated = annotations.exclude(image__image_type="B")
+    smartphone_not_annotated = not_annotated_images.exclude(image__image_type="B")
+
+    annotated_count_brightfield = brightfield_annotated.count()
+    not_annotated_count_brightfield = brightfield_not_annotated.count()
+
+    annotated_count_smartphone = smartphone_annotated.count()
+    not_annotated_count_smartphone = smartphone_not_annotated.count()
 
     context = {
         "images": {
-            "annotations": annotations,
-            "not_annotated": not_annotated_images,
-            "annotated_count": annotated_images_count,
-            "not_annotated_count": not_annotated_images_count,
-            "total_count": annotated_images_count + not_annotated_images_count,
+            "brightfield_annotated": brightfield_annotated,
+            "brightfield_not_annotated": brightfield_not_annotated,
+            "smartphone_annotated": smartphone_annotated,
+            "smartphone_not_annotated": smartphone_not_annotated,
+            "annotated_count_brightfield": annotated_count_brightfield,
+            "not_annotated_count_brightfield": not_annotated_count_brightfield,
+            "annotated_count_smartphone": annotated_count_smartphone,
+            "not_annotated_count_smartphone": not_annotated_count_smartphone,
         },
         "media_path": settings.MEDIA_URL,
     }

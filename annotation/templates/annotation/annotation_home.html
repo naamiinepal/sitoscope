@@ -1,51 +1,91 @@
-{% extends "base.html" %} 
+{% extends "base.html" %}
+{% load static %} 
 {%load template_utils %} 
+
+{% block title %}
+Parasitoscope Annotation
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar bg-light">
+  <div class="container-fluid">
+      {% if user.is_authenticated %}
+      <a class="navbar-brand" href="{% url 'user:index' %}">
+          <img src="{% static 'img/logo.png' %}" alt="Logo" width="32" height="32"
+              style="width: 24px; height: auto;" class="d-inline-block align-text-top">
+          Parasitoscope <span class="badge rounded-pill text-bg-success">Annotation</span>
+      </a>
+      <div class="dropdown">
+          <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              <i class="bi bi-person-circle"></i>
+          </a>
+
+          <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">{{user.username}}</a></li>
+              <li>
+                  <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item z-3" href="{% url 'user:logout' %}">
+                      Log out
+                      <i class="bi bi-box-arrow-right"></i>
+                  </a>
+              </li>
+          </ul>
+      </div>
+
+
+
+      {% else %}
+      <a class="navbar-brand" href="{% url 'user:index' %}">
+          <img src="{% static 'img/logo.png' %}" alt="Logo" width="32" height="32"
+              style="width: 24px; height: auto;" class="d-inline-block align-text-top">
+          Parasitoscope
+      </a>
+      <a class="btn btn-outline-success me-2" href="{% url 'user:login' %}">Log In</a>
+
+      {% endif %}
+      
+  </div>
+</nav>
+{% endblock %}
 
 {% block body %}
 
 <div class="ms-4 me-4">
-  <nav id="scanfcode" class="navbar">
-    <div class="container-fluid">
-      <div class="navbar-header d-flex justify-content-between w-100">
-        <div>
-          <a id="logo" class="navbar-brand" href="#">Annotation Home</a>
-        </div>
-      </div>
-    </div>
-  </nav>
   <div class="row mt-4">
     <div class="col-8 bg-white">
       <div class="pt-4">
+        <p class="h2">Brightfield Images</p>
         <!-- Tabs navs -->
         <div class="d-flex justify-content-between">
         <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link nav-link-btn active" id="not-annotated-tab" data-bs-toggle="tab"
-              data-bs-target="#no-annot" type="button" role="tab" aria-controls="no-annot" aria-selected="true">
+            <button class="nav-link nav-link-btn active" id="not-annotated-tab-brightfield" data-bs-toggle="tab"
+              data-bs-target="#no-annot-brightfield" type="button" role="tab" aria-controls="no-annot-brightfield" aria-selected="true">
               Not Annotated
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="annotated-tab" data-bs-toggle="tab" data-bs-target="#yes-annot" type="button"
-              role="tab" aria-controls="yes-annot" aria-selected="false">
+            <button class="nav-link" id="annotated-tab-brightfield" data-bs-toggle="tab" data-bs-target="#yes-annot-brightfield" type="button"
+              role="tab" aria-controls="yes-annot-brightfield" aria-selected="false">
               Annotated
             </button>
-            
           </li>
         </ul>
         </div>
 
         <div class="tab-content" id="myTabContent">
-          <div class="tab-pane fade show active border-right" id="no-annot" role="tabpanel"
-            aria-labelledby="not-annotated-tab">
-            <table id="myTableNotAnnotated" class="display fw-bold" style="width: 100%">
+          <div class="tab-pane fade show active border-right" id="no-annot-brightfield" role="tabpanel"
+            aria-labelledby="not-annotated-tab-brightfield">
+            <table id="myTableNotAnnotatedBrightfield" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
                   <th>ID</th>
                 </tr>
               </thead>
               <tbody>
-                {%for img in images.not_annotated%}
+                {%for img in images.brightfield_not_annotated%}
                     <tr>
                       <td>
                         <a href="{% url 'annotation:via_annotation_get' img=img.image %}">
@@ -63,8 +103,8 @@
               </tfoot>
             </table>
           </div>
-          <div class="tab-pane fade" id="yes-annot" role="tabpanel" aria-labelledby="annnotated-tab">
-            <table id="myTableAnnotated" class="display fw-bold" style="width: 100%">
+          <div class="tab-pane fade" id="yes-annot-brightfield" role="tabpanel" aria-labelledby="annnotated-tab">
+            <table id="myTableAnnotatedBrightfield" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
                   <th>ID</th>
@@ -72,7 +112,7 @@
                 </tr>
               </thead>
               <tbody>
-                {%for ann in images.annotations%}
+                {%for ann in images.brightfield_annotated%}
                     <tr>
                       <td>
                         <a href="{% url 'annotation:via_annotation_get' img=ann.image.image_id %}">
@@ -99,24 +139,134 @@
     </div>
     <div class="col-4 mt-4">
       <div>
-        <canvas id="pieChart"></canvas>
         <div class="display-3 row ms-2 mt-3 pt-2 text-white">
           <div class="col-6">
-            <div style="background-color: #b15928;" class="chart-numbers">
+            <div style="background-color: #198754;" class="chart-numbers">
               <p class="h6">
                 <i class="fa fa-times-circle"></i>
                 Not Annotated
               </p>
-              <p class="h1">{{images.not_annotated_count}}</p>
+              <p class="h1">{{images.not_annotated_count_brightfield}}</p>
             </div>
           </div>
           <div class="col-6 border-start">
-            <div style="background-color:#1f78b4;" class="chart-numbers">
+            <div style="background-color:#b15928;" class="chart-numbers">
               <p class="h6">
                 <i class="fa fa-check-circle" aria-hidden="true"></i>
                 Annotated
               </p>
-              <p class="h1">{{images.annotated_count}}</p>
+              <p class="h1">{{images.annotated_count_brightfield}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-4">
+    <hr>
+    <div class="col-8 bg-white">
+      <div class="pt-4">
+        <p class="h2">Smartphone Images</p>
+        <!-- Tabs navs -->
+        <div class="d-flex justify-content-between">
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link nav-link-btn active" id="not-annotated-tab-smartphone" data-bs-toggle="tab"
+              data-bs-target="#no-annot-smartphone" type="button" role="tab" aria-controls="no-annot-smartphone" aria-selected="true">
+              Not Annotated
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="annotated-tab-smartphone" data-bs-toggle="tab" data-bs-target="#yes-annot-smartphone" type="button"
+              role="tab" aria-controls="yes-annot-smartphone" aria-selected="false">
+              Annotated
+            </button>
+            
+          </li>
+        </ul>
+        </div>
+
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active border-right" id="no-annot-smartphone" role="tabpanel"
+            aria-labelledby="not-annotated-tab-smartphone">
+            <table id="myTableNotAnnotatedSmartphone" class="display fw-bold" style="width: 100%">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%for img in images.smartphone_not_annotated%}
+                    <tr>
+                      <td>
+                        <a href="{% url 'annotation:via_annotation_get' img=img.image %}">
+                          {{img.image.image_id}}
+                        </a>
+                      </td>
+                      
+                    </tr>
+                {%endfor%}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>ID</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="yes-annot-smartphone" role="tabpanel" aria-labelledby="annnotated-tab">
+            <table id="myTableAnnotatedSmartphone" class="display fw-bold" style="width: 100%">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Annotation Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%for ann in images.smartphone_annotated%}
+                    <tr>
+                      <td>
+                        <a href="{% url 'annotation:via_annotation_get' img=ann.image.image_id %}">
+                          {{ann.image.image_id}}
+                        </a>
+                      </td>
+                      <td>
+                        {{ann.annotated_on}}
+                      </td>
+                    </tr>
+                {%endfor%}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>ID</th>
+                  <th>Annotation Date</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+        <!-- Tabs content -->
+      </div>
+    </div>
+    <div class="col-4 mt-4">
+      <div>
+        <div class="display-3 row ms-2 mt-3 pt-2 text-white">
+          <div class="col-6">
+            <div style="background-color: #0d6efd;" class="chart-numbers">
+              <p class="h6">
+                <i class="fa fa-times-circle"></i>
+                Not Annotated
+              </p>
+              <p class="h1">{{images.not_annotated_count_smartphone}}</p>
+            </div>
+          </div>
+          <div class="col-6 border-start">
+            <div style="background-color:#da6b11;" class="chart-numbers">
+              <p class="h6">
+                <i class="fa fa-check-circle" aria-hidden="true"></i>
+                Annotated
+              </p>
+              <p class="h1">{{images.annotated_count_smartphone}}</p>
             </div>
           </div>
         </div>
@@ -126,7 +276,7 @@
 </div>
 <style>
   body {
-    background: #e6e6ff;
+    /* background: #e6e6ff; */
     font-family: "Encode Sans", sans-serif;
   }
 
@@ -169,31 +319,61 @@
     font-weight: bold;
   }
 
-  .nav-tabs .nav-link#not-annotated-tab.active,
-  .nav-tabs .nav-link#not-annotated-tab:hover {
+  .nav-tabs .nav-link#not-annotated-tab-brightfield.active,
+  .nav-tabs .nav-link#not-annotated-tab-brightfield:hover {
+    background-color: #198754;
+    color: #f2f2f2;
+  }
+
+  .nav-tabs .nav-link#annotated-tab-brightfield.active,
+  .nav-tabs .nav-link#annotated-tab-brightfield:hover {
     background-color: #b15928;
     color: #f2f2f2;
   }
 
-  .nav-tabs .nav-link#annotated-tab.active,
-  .nav-tabs .nav-link#annotated-tab:hover {
-    background-color: #1f78b4;
-    color: #f2f2f2;
+  #myTableNotAnnotatedBrightfield {
+    border: medium solid #198754;
   }
 
-  #myTableNotAnnotated {
-    border: medium solid #b15928;
-  }
-
-  #myTableNotAnnotated a {
+  #myTableNotAnnotatedBrightfield a {
     color: #000;
   }
 
-  #myTableAnnotated {
-    border: medium solid #1f78b4;
+  #myTableAnnotatedBrightfield {
+    border: medium solid #b15928;
   }
 
-  #myTableAnnotated a {
+  #myTableAnnotatedBrightfield a {
+    color: #000;
+  }
+
+
+
+  .nav-tabs .nav-link#not-annotated-tab-smartphone.active,
+  .nav-tabs .nav-link#not-annotated-tab-smartphone:hover {
+    background-color: #0d6efd;
+    color: #f2f2f2;
+  }
+
+  .nav-tabs .nav-link#annotated-tab-smartphone.active,
+  .nav-tabs .nav-link#annotated-tab-smartphone:hover {
+    background-color: #da6b11;
+    color: #f2f2f2;
+  }
+
+  #myTableNotAnnotatedSmartphone {
+    border: medium solid #0d6efd;
+  }
+
+  #myTableNotAnnotatedSmartphone a {
+    color: #000;
+  }
+
+  #myTableAnnotatedSmartphone {
+    border: medium solid #da6b11;
+  }
+
+  #myTableAnnotatedSmartphone a {
     color: #000;
   }
 
@@ -215,44 +395,19 @@
 <script>
   console.log('{{images.annotated_labels|escapejs}}')
   $(document).ready(function () {
-    $("#myTableNotAnnotated").DataTable();
+    $("#myTableNotAnnotatedBrightfield").DataTable();
   });
 
   $(document).ready(function () {
-    $("#myTableAnnotated").DataTable();
+    $("#myTableAnnotatedBrightfield").DataTable();
   });
 
-  // For rendering charts in the right side
-  const [not_annotated_count, annotated_count] = [
-    Number("{{images.not_annotated_count|escapejs}}"),
-    Number("{{images.annotated_count|escapejs}}"),
-  ];
-  const ctx = document.getElementById("pieChart");
+  $(document).ready(function () {
+    $("#myTableNotAnnotatedSmartphone").DataTable();
+  });
 
-  new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["Not Annotated Count", "Annotated Count"],
-      datasets: [
-        {
-          label: "# of Images",
-          data: [not_annotated_count, annotated_count],
-          borderWidth: 1,
-          backgroundColor: ['#b15928', '#1f78b4']
-        },
-      ],
-    },
-    options: {
-      plugins: {
-        legend: {
-          labels: {
-            font: {
-              size: 16
-            }
-          }
-        }
-      }
-    },
+  $(document).ready(function () {
+    $("#myTableAnnotatedSmartphone").DataTable();
   });
 </script>
 {%endblock%}
