@@ -2,13 +2,22 @@ GENDER_CHOICES = [("M", "Male"), ("F", "Female"), ("O", "Others")]
 
 WATER_TYPE_CHOICES = [
     ("RI", "River"),
-    ("MT", "Municipal Tap"),
     ("BO", "Bottled"),
     ("JA", "Jar"),
     ("LA", "Lake"),
-    ("TA", "Tanker"),
-    ("TU", "Tubewell"),
+    ("WL", "Wetland"),
+    ("WW", "Well Water"),
+    ("DB", "Deep Boring"),
+    ("PW", "Pond Water"),
+    ("ST", "Stream"),
     ("SW", "Spring Water"),
+    ("MT", "Tap (Municipal Tap)"),
+    ("TA", "Tap (Tanker)"),
+    ("TU", "Tap (Tubewell)"),
+    ("DH", "Tap (Dhungedhara)"),
+    ("BR", "Tap (Boring)"),
+    ("FL", "Tap (Filter)"),
+    ("WT", "Tap (Water Tank)"),
 ]
 
 VEGETABLE_CHOICES = [
