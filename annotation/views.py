@@ -87,6 +87,7 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
         "annotation_url": annotation.label_file,
         "media_path": settings.MEDIA_URL,
         "labels": dumps(LABELS),
+        "has_cyst": annotation.has_cyst,
     }
     print(dumps(LABELS))
 
@@ -119,6 +120,7 @@ def via_post(request: HttpRequest) -> HttpResponse:
             annot_obj = Annotation.objects.get(annotator=annotator, image=img)
             annot_obj.label_file.delete()
             annot_obj.label_file = File(json_file, f"{image_id}_{username}.json")
+            annot_obj.has_cyst = True
             annot_obj.annotated = True
             annot_obj.annotated_on = datetime.now()
             # annot_obj.labels.set(used_labels)
@@ -127,6 +129,7 @@ def via_post(request: HttpRequest) -> HttpResponse:
         except ObjectDoesNotExist:
             annot_obj = Annotation.objects.create(annotator=annotator, image=img)
             annot_obj.label_file = File(json_file, f"{image_id}_{username}.json")
+            annot_obj.has_cyst = True
             annot_obj.annotated = True
             annot_obj.annotated_on = datetime.now()
             # annot_obj.labels.set(used_labels)
@@ -138,3 +141,39 @@ def via_post(request: HttpRequest) -> HttpResponse:
         return HttpResponse(
             '<div> <h2>Sorry the image does not exist.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
         )
+
+
+@login_required
+@csrf_exempt
+def no_cyst_present(request: HttpRequest) -> HttpResponse:
+    image_id = request.POST["img"]
+    try:
+        img = SlideImage.objects.get(image_id=image_id)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry the image does not exist.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    user = request.user
+    try:
+        annotator = Annotator.objects.get(user=user)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry you are not an annotator.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    try:
+        annot_obj = Annotation.objects.get(annotator=annotator, image=img)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry you are not assigned this image.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    if annot_obj.label_file:
+        annot_obj.label_file.delete()
+
+    annot_obj.has_cyst = False
+    annot_obj.annotated = True
+    annot_obj.annotated_on = datetime.now()
+    annot_obj.save()
+
+    return JsonResponse(
+        {"message": "Annotations Sync Successful. This image does not have a cyst."}
+    )
