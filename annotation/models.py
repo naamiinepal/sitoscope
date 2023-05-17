@@ -20,5 +20,6 @@ class Annotation(models.Model):
     )
     annotator = models.ForeignKey(Annotator, on_delete=models.PROTECT)
     label_file = models.FileField(upload_to="annotation/labels")
+    has_cyst = models.BooleanField(default=False)
     annotated = models.BooleanField(default=False)
     annotated_on = models.DateTimeField(null=True, blank=True)

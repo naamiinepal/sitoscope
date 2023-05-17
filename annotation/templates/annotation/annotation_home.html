@@ -109,6 +109,7 @@ Parasitoscope Annotation
                 <tr>
                   <th>ID</th>
                   <th>Annotation Date</th>
+                  <th>Cysts</th>
                 </tr>
               </thead>
               <tbody>
@@ -122,6 +123,13 @@ Parasitoscope Annotation
                       <td>
                         {{ann.annotated_on}}
                       </td>
+                      <td>
+                        {% if ann.has_cyst %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% endif %}
+                      </td>
                     </tr>
                 {%endfor%}
               </tbody>
@@ -129,6 +137,7 @@ Parasitoscope Annotation
                 <tr>
                   <th>ID</th>
                   <th>Annotation Date</th>
+                  <th>Cysts</th>
                 </tr>
               </tfoot>
             </table>
@@ -220,6 +229,7 @@ Parasitoscope Annotation
                 <tr>
                   <th>ID</th>
                   <th>Annotation Date</th>
+                  <th>Cysts</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,6 +243,13 @@ Parasitoscope Annotation
                       <td>
                         {{ann.annotated_on}}
                       </td>
+                      <td>
+                        {% if ann.has_cyst %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% endif %}
+                      </td>
                     </tr>
                 {%endfor%}
               </tbody>
@@ -240,6 +257,7 @@ Parasitoscope Annotation
                 <tr>
                   <th>ID</th>
                   <th>Annotation Date</th>
+                  <th>Cysts</th>
                 </tr>
               </tfoot>
             </table>

@@ -572,8 +572,13 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
         
         <!-- Change Start
           Author: Manish Dhakal -->
-        <button style="padding: 5px; margin: 5px;">Previous</button>
-        <button style="padding: 5px; margin: 5px;">Next</button>
+          <div>
+            <button style="padding: 5px; margin: 5px;" onclick="change_image('previous')">Previous</button>
+            <button style="padding: 5px; margin: 5px;" onclick="change_image('next')">Next</button>
+          </div>
+          <div>
+            <button style="padding: 5px; margin: 5px;" onclick="no_cyst_present()">No Cysts Present</button>
+          </div>
         <!-- Change End -->
 
         <button class="leftsidebar_accordion active">Region Shape</button>
@@ -11448,7 +11453,51 @@ function validate_json(){
   else return true;
 }
 
+async function no_cyst_present() {
+  const queryString = window.location.pathname;
+  const urlParams = queryString.split('/');
+  // get the last element of the array
+  const img_name = urlParams[urlParams.length - 1];
+  console.log(img_name);
+  let formData =  new FormData();
+  formData.append("img", img_name);
 
+  const response = await fetch("{%url 'annotation:no_cyst_present' %}", {
+    method:'post',
+    body:formData,
+  });
+
+  if (response.status === 200){
+    show_message("Annotations Sync Successful. This image does not have a cyst.. Please reload the window to see changes.");
+    alert("Annotations Sync Successful. This image does not have a cyst. Please reload the window to see changes.");
+    // window.location.reload();
+  }
+  else{
+    show_message(`Error code: ${response.status}, ${response.statusText}`);
+  }
+}
+
+
+async function change_image(step) {
+  const queryString = window.location.pathname;
+  const urlParams = queryString.split('/');
+  // get the last element of the array
+  const img_name = urlParams[urlParams.length - 1];
+  console.log(img_name, step);
+  const response = await fetch(`{% url 'annotation:change_image' %}?img=${img_name}&step=${step}`);
+
+  // get image id
+  const json_response = await response.json();
+  const new_img_name = json_response.img;
+
+  // change the url
+  const new_url = window.location.pathname.replace(img_name, new_img_name);
+
+  console.log(new_url)
+
+  // redirect to the new url
+  window.location.href = new_url;
+}
 
 //Synchronizes the annotation with the backend server
 async function sync_annotation_with_server() {
