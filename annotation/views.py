@@ -72,7 +72,7 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
 
     try:
         image = SlideImage.objects.get(image_id=img)
-    except SlideImage.ObjectDoesNotExist:
+    except SlideImage.DoesNotExist:
         return HttpResponse(status=404, content="Image not found.")
 
     try:
@@ -176,4 +176,52 @@ def no_cyst_present(request: HttpRequest) -> HttpResponse:
 
     return JsonResponse(
         {"message": "Annotations Sync Successful. This image does not have a cyst."}
+    )
+
+
+@login_required
+def change_image(request: HttpRequest) -> HttpResponse:
+    user = request.user
+    img, step = request.GET["img"], request.GET["step"]
+    try:
+        annotator = Annotator.objects.get(user=user)
+    except Annotator.DoesNotExist:
+        return HttpRequest(status=403, content="You are not an annotator.")
+
+    try:
+        image = SlideImage.objects.get(image_id=img)
+    except SlideImage.DoesNotExist:
+        return HttpResponse(status=404, content="Image not found.")
+    try:
+        annotation = Annotation.objects.get(image=image, annotator=annotator)
+    except Annotation.DoesNotExist:
+        return HttpResponse(
+            status=404,
+            content="Either the annotation does not exist or you are not assigned this annotation.",
+        )
+
+    if step == "next":
+        kwargs = dict(id__gt=annotation.id)
+    else:
+        kwargs = dict(id__lt=annotation.id)
+    order_by = "id"
+
+    new_image = (
+        Annotation.objects.filter(
+            **kwargs,
+            image__image_type=image.image_type,
+            annotator=annotator,
+            annotated=False,
+        )
+        .order_by(order_by)
+        .first()
+    )
+
+    if new_image is None:
+        return HttpResponse(status=404, content="No more images in this category.")
+
+    return JsonResponse(
+        {
+            "img": new_image.image.image_id,
+        }
     )
