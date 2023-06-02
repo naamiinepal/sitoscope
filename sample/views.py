@@ -171,7 +171,7 @@ class SlideImageViewSetAPI(viewsets.ModelViewSet):
     List the details of an image.
     """
 
-    lookup_field = "image_id"
+    lookup_field = "id"
     queryset = SlideImage.objects.all()
     serializer_class = SlideImageSerializer
     permission_classes = [
