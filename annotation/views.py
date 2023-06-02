@@ -72,7 +72,7 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
 
     try:
         image = SlideImage.objects.get(image_id=img)
-    except SlideImage.ObjectDoesNotExist:
+    except SlideImage.DoesNotExist:
         return HttpResponse(status=404, content="Image not found.")
 
     try:
@@ -87,6 +87,7 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
         "annotation_url": annotation.label_file,
         "media_path": settings.MEDIA_URL,
         "labels": dumps(LABELS),
+        "has_cyst": annotation.has_cyst,
     }
     print(dumps(LABELS))
 
@@ -119,6 +120,7 @@ def via_post(request: HttpRequest) -> HttpResponse:
             annot_obj = Annotation.objects.get(annotator=annotator, image=img)
             annot_obj.label_file.delete()
             annot_obj.label_file = File(json_file, f"{image_id}_{username}.json")
+            annot_obj.has_cyst = True
             annot_obj.annotated = True
             annot_obj.annotated_on = datetime.now()
             # annot_obj.labels.set(used_labels)
@@ -127,6 +129,7 @@ def via_post(request: HttpRequest) -> HttpResponse:
         except ObjectDoesNotExist:
             annot_obj = Annotation.objects.create(annotator=annotator, image=img)
             annot_obj.label_file = File(json_file, f"{image_id}_{username}.json")
+            annot_obj.has_cyst = True
             annot_obj.annotated = True
             annot_obj.annotated_on = datetime.now()
             # annot_obj.labels.set(used_labels)
@@ -138,3 +141,87 @@ def via_post(request: HttpRequest) -> HttpResponse:
         return HttpResponse(
             '<div> <h2>Sorry the image does not exist.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
         )
+
+
+@login_required
+@csrf_exempt
+def no_cyst_present(request: HttpRequest) -> HttpResponse:
+    image_id = request.POST["img"]
+    try:
+        img = SlideImage.objects.get(image_id=image_id)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry the image does not exist.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    user = request.user
+    try:
+        annotator = Annotator.objects.get(user=user)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry you are not an annotator.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    try:
+        annot_obj = Annotation.objects.get(annotator=annotator, image=img)
+    except ObjectDoesNotExist:
+        return HttpResponse(
+            '<div> <h2>Sorry you are not assigned this image.</h2> <a href="/dashboard"> Go to Dashboard</a> </div>'
+        )
+    if annot_obj.label_file:
+        annot_obj.label_file.delete()
+
+    annot_obj.has_cyst = False
+    annot_obj.annotated = True
+    annot_obj.annotated_on = datetime.now()
+    annot_obj.save()
+
+    return JsonResponse(
+        {"message": "Annotations Sync Successful. This image does not have a cyst."}
+    )
+
+
+@login_required
+def change_image(request: HttpRequest) -> HttpResponse:
+    user = request.user
+    img, step = request.GET["img"], request.GET["step"]
+    try:
+        annotator = Annotator.objects.get(user=user)
+    except Annotator.DoesNotExist:
+        return HttpRequest(status=403, content="You are not an annotator.")
+
+    try:
+        image = SlideImage.objects.get(image_id=img)
+    except SlideImage.DoesNotExist:
+        return HttpResponse(status=404, content="Image not found.")
+    try:
+        annotation = Annotation.objects.get(image=image, annotator=annotator)
+    except Annotation.DoesNotExist:
+        return HttpResponse(
+            status=404,
+            content="Either the annotation does not exist or you are not assigned this annotation.",
+        )
+
+    if step == "next":
+        kwargs = dict(id__gt=annotation.id)
+    else:
+        kwargs = dict(id__lt=annotation.id)
+    order_by = "id"
+
+    new_image = (
+        Annotation.objects.filter(
+            **kwargs,
+            image__image_type=image.image_type,
+            annotator=annotator,
+            annotated=False,
+        )
+        .order_by(order_by)
+        .first()
+    )
+
+    if new_image is None:
+        return HttpResponse(status=404, content="No more images in this category.")
+
+    return JsonResponse(
+        {
+            "img": new_image.image.image_id,
+        }
+    )
