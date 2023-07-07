@@ -48,6 +48,7 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         # total approved images
         context["total_images_approved"] = SlideImage.objects.filter(
             ~Q(image=""),
+            slide__stool_sample__isnull=False,
             approved=True,
         ).count()
         # total images pending approval

@@ -45,6 +45,7 @@ class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         # total approved images
         context["total_images_approved"] = SlideImage.objects.filter(
             ~Q(image=""),
+            slide__water_sample__isnull=False,
             approved=True,
         ).count()
         # total images pending approval
