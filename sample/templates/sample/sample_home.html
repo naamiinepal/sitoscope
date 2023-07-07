@@ -8,12 +8,32 @@
 {% block body %}
 {% with add_url_name="sample:"|add:sample_type|add:"_create" %}
 {% with detail_url_name="sample:"|add:sample_type|add:"_detail" %}
-    <h5 class="text-center">{{ sample_type|title }} Samples</h5>
+    <h3 class="text-center">{{ sample_type|title }} Samples</h3>
     <div class="row">
         <div class="col"></div>
         <div class="col">
             <div class="text-success">
                 <hr>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <th scope="col">Samples</th>
+                        <th scope="col">Images Uploaded</th>
+                        <th scope="col">Remaining to Upload</th>
+                        <th scope="col">Approved</th>
+                        <th scope="col">Not Approved</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ total_samples }}</td>
+                            <td>{{ total_images_uploaded }}</td>
+                            <td>{{ total_images_remaining }}</td>
+                            <td>{{ total_images_approved }}</td>
+                            <td>{{ total_images_pending_approval }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         <div class="col"></div>
@@ -31,7 +51,28 @@
     </div>
     {% endif %}
     {% if latest_samples_list %}
-    <div class="text-start mt-5">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <th scope="col">#</th>
+                <th scope="col">Sample ID</th>
+                <th scope="col">Date of collection</th>
+            </thead>
+            <tbody>
+                {% for sample in latest_samples_list %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>
+                        <a href="{% url detail_url_name sample.sample_id %}"
+                            class="text-break text-decoration-none">{{sample.sample_id}}</a>
+                    </td>
+                    <td>{{ sample.date_of_collection }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <!-- <div class="text-start mt-5">
         <ul class="list-group list-group-flush">
             {% for sample in latest_samples_list %}
             <li class="list-group-item">
@@ -40,7 +81,7 @@
             </li>
             {% endfor %}
         </ul>
-    </div>
+    </div> -->
     {% else %}
     <div class="text-center mt-5">
         <h5>No samples to show.</h5>

@@ -33,6 +33,24 @@ class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["sample_type"] = "water"
+        context["total_samples"] = Water.objects.count()
+
+        context["total_images_uploaded"] = SlideImage.objects.filter(
+            ~Q(image=""), slide__water_sample__isnull=False
+        ).count()
+        # images remaining to upload
+        context["total_images_remaining"] = (
+            context["total_samples"] * IMAGE_COUNT * SLIDE_COUNT * 2
+        ) - context["total_images_uploaded"]
+        # total approved images
+        context["total_images_approved"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            approved=True,
+        ).count()
+        # total images pending approval
+        context["total_images_pending_approval"] = (
+            context["total_images_uploaded"] - context["total_images_approved"]
+        )
         return context
 
 

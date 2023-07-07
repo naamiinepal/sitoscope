@@ -1,7 +1,10 @@
+from typing import Any
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
-from django.db.models import Q
+from django.db.models import Count, Prefetch, Q
+from django.db.models.query import QuerySet
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -32,8 +35,41 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        context["total_samples"] = Stool.objects.count()
+        # images uploaded for stool sample, filter all slide images whose slide is a stool sample and has an image
+        context["total_images_uploaded"] = SlideImage.objects.filter(
+            ~Q(image=""), slide__stool_sample__isnull=False
+        ).count()
+        # images remaining to upload
+        context["total_images_remaining"] = (
+            context["total_samples"] * IMAGE_COUNT * SLIDE_COUNT * 2
+        ) - context["total_images_uploaded"]
+        # total approved images
+        context["total_images_approved"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            approved=True,
+        ).count()
+        # total images pending approval
+        context["total_images_pending_approval"] = (
+            context["total_images_uploaded"] - context["total_images_approved"]
+        )
         context["sample_type"] = "stool"
         return context
+
+    # def get_queryset(self) -> QuerySet[Any]:
+    #     return Stool.objects.annotate(
+    #         total_images=Count(
+    #             Q(
+    #                 stool_slides__slide_image__approved=True,
+    #             ),
+    #         ),
+    #         uploaded_images=Count(
+    #             ~Q(
+    #                 stool_slides__slide_image__image="",
+    #             )
+    #         ),
+    #     ).order_by("-id")
 
 
 class StoolFormView(
