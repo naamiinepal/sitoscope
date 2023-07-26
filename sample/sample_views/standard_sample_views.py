@@ -116,8 +116,15 @@ class StandardDetailView(
             slide.smartphone_images_count = SlideImage.objects.filter(
                 ~Q(image=""), slide=slide.id, image_type="S"
             ).count()
+            slide.smartphone_images_approved_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="S", approved=True
+            ).count()
+
             slide.brightfield_images_count = SlideImage.objects.filter(
                 ~Q(image=""), slide=slide.id, image_type="B"
+            ).count()
+            slide.brightfield_images_approved_count = SlideImage.objects.filter(
+                ~Q(image=""), slide=slide.id, image_type="B", approved=True
             ).count()
         context["slides"] = slides
         context["sample_type"] = "standard"

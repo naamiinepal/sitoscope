@@ -29,11 +29,12 @@
 {% else %}
 {% setvar "sample:"|add:sample_type|add:"_slide_image_upload" as brightfield_slide_images_url %}
 {% endif %}
-<table class="table mt-2 table-borderless">
+<table class="table mt-2 table-bordered table-responsive">
     <thead class="table-light">
         <tr>
             <th scope="col">Slide {{ forloop.counter}}</th>
-            <th scope="col"></th>
+            <th scope="col">Uploaded</th>
+            <th scope="col">Approved</th>
         </tr>
     </thead>
     <tbody>
@@ -47,7 +48,8 @@
                 <a class="link-primary" href="#">Smartphone</a>
                 {% endif %}
             </td>
-            <td>{{ slide.smartphone_images_count }}/15</td>
+            <td class="text-center">{{ slide.smartphone_images_count }}</td>
+            <td class="text-center">{{ slide.smartphone_images_approved_count }}</td>
         </tr>
         <tr class="text-success">
             <td>
@@ -58,7 +60,8 @@
                 <a href="#" class="link-success">Brightfield</a>
                 {% endif %}
             </td>
-            <td>{{ slide.brightfield_images_count }}/15</td>
+            <td class="text-center">{{ slide.brightfield_images_count }}</td>
+            <td class="text-center">{{ slide.brightfield_images_approved_count }}</td>
         </tr>
     </tbody>
 </table>
