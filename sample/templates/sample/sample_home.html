@@ -5,74 +5,104 @@
 {{ sample_type|title }} Samples
 {% endblock %}
 
+{% block head %}
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+{% endblock %}
+
 {% block body %}
+
+
 {% with add_url_name="sample:"|add:sample_type|add:"_create" %}
 {% with detail_url_name="sample:"|add:sample_type|add:"_detail" %}
-    <h3 class="text-center">{{ sample_type|title }} Samples</h3>
-    <div class="row">
-        <div class="col"></div>
+<h3 class="text-center">{{ sample_type|title }} Samples</h3>
+
+<div class="container">
+    {% with list_url="sample:"|add:sample_type|add:"_list" %}
+    <form action="{% url list_url %}" method="GET" >
+    {% endwith %}
+        <div class="row">
         <div class="col">
-            <div class="text-success">
-                <hr>
+            
+        </div>
+        <div class="col">
+                {{ filter_form }}
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <th scope="col">Samples</th>
-                        <th scope="col">Images Uploaded</th>
-                        <th scope="col">Remaining to Upload</th>
-                        <th scope="col">Approved</th>
-                        <th scope="col">Not Approved</th>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>{{ total_samples }}</td>
-                            <td>{{ total_images_uploaded }}</td>
-                            <td>{{ total_images_remaining }}</td>
-                            <td>{{ total_images_approved }}</td>
-                            <td>{{ total_images_pending_approval }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Filter</button>
             </div>
         </div>
-        <div class="col"></div>
+    </form>
+</div>
+
+<div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <div class="text-success">
+            <hr>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <th scope="col">Samples</th>
+                    <th scope="col">Images Uploaded</th>
+                    <th scope="col">Remaining to Upload</th>
+                    <th scope="col">Approved</th>
+                    <th scope="col">Not Approved</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ total_samples }}</td>
+                        <td>{{ total_images_uploaded }}</td>
+                        <td>{{ total_images_remaining }}</td>
+                        <td>{{ total_images_approved }}</td>
+                        <td>{{ total_images_pending_approval }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-    {% if sample_type == "standard" and not perms.sample.add_standard %}
-    {% elif sample_type == "water" and not perms.sample.add_water %}
-    {% elif sample_type == "vegetable" and not perms.sample.add_vegetable %}
-    {% elif sample_type == "stool" and not perms.sample.add_stool %}
-    {% else %}
-    <div class="mx-auto text-center">
-        <a class="btn btn-success btn-lg rounded-5" href="{% url add_url_name %}">
-            Add Sample
-            <i class="bi bi-plus-circle"></i>
-        </a>
-    </div>
-    {% endif %}
-    {% if latest_samples_list %}
-    <div class="table-responsive">
-        <table class="table">
-            <thead>
-                <th scope="col">#</th>
-                <th scope="col">Sample ID</th>
-                <th scope="col">Date of collection</th>
-            </thead>
-            <tbody>
-                {% for sample in latest_samples_list %}
-                <tr>
-                    <th scope="row">{{ forloop.counter }}</th>
-                    <td>
-                        <a href="{% url detail_url_name sample.sample_id %}"
-                            class="text-break text-decoration-none">{{sample.sample_id}}</a>
-                    </td>
-                    <td>{{ sample.date_of_collection }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <!-- <div class="text-start mt-5">
+    <div class="col"></div>
+</div>
+{% if sample_type == "standard" and not perms.sample.add_standard %}
+{% elif sample_type == "water" and not perms.sample.add_water %}
+{% elif sample_type == "vegetable" and not perms.sample.add_vegetable %}
+{% elif sample_type == "stool" and not perms.sample.add_stool %}
+{% else %}
+<div class="mx-auto text-center">
+    <a class="btn btn-success btn-lg rounded-5" href="{% url add_url_name %}">
+        Add Sample
+        <i class="bi bi-plus-circle"></i>
+    </a>
+</div>
+{% endif %}
+{% if latest_samples_list %}
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <th scope="col">#</th>
+            <th scope="col">Sample ID</th>
+            <th scope="col">Date of collection</th>
+        </thead>
+        <tbody>
+            {% for sample in latest_samples_list %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>
+                    <a href="{% url detail_url_name sample.sample_id %}"
+                        class="text-break text-decoration-none">{{sample.sample_id}}</a>
+                </td>
+                <td>{{ sample.date_of_collection }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- <div class="text-start mt-5">
         <ul class="list-group list-group-flush">
             {% for sample in latest_samples_list %}
             <li class="list-group-item">
@@ -82,11 +112,11 @@
             {% endfor %}
         </ul>
     </div> -->
-    {% else %}
-    <div class="text-center mt-5">
-        <h5>No samples to show.</h5>
-    </div>
-    {% endif %}
+{% else %}
+<div class="text-center mt-5">
+    <h5>No samples to show.</h5>
+</div>
+{% endif %}
 
 {% endwith %}
 {% endwith %}

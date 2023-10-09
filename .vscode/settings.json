@@ -1,5 +1,5 @@
 {
-    "python.formatting.provider": "black",
+    "python.formatting.provider": "none",
     "python.linting.flake8Enabled": true,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
@@ -9,5 +9,10 @@
     },
     "[html]": {
         "editor.formatOnSave": false
-    }
+    },
+    "python.linting.enabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    "python.analysis.typeCheckingMode": "off"
 }

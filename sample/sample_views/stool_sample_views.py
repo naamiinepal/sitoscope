@@ -1,10 +1,7 @@
-from typing import Any
-
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
-from django.db.models import Count, Prefetch, Q
-from django.db.models.query import QuerySet
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -19,10 +16,11 @@ from view_breadcrumbs import (
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
-from sample.forms.standard_sample_form import SlideImagesForm
+from sample.forms.standard_sample_form import SlideImagesForm, FilterForm
 from sample.forms.stool_sample_forms import StoolForm
 from sample.models import Slide, SlideImage, Stool
 from sample.utils import create_sample_id
+import datetime
 
 
 # Create your views here
@@ -36,10 +34,11 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["total_samples"] = Stool.objects.count()
+        stool_objects = self.object_list
+        context["total_samples"] = stool_objects.count()
         # images uploaded for stool sample, filter all slide images whose slide is a stool sample and has an image
         context["total_images_uploaded"] = SlideImage.objects.filter(
-            ~Q(image=""), slide__stool_sample__isnull=False
+            ~Q(image=""), slide__stool_sample__isnull=False, slide__stool_sample__id__in=stool_objects
         ).count()
         # images remaining to upload
         context["total_images_remaining"] = (
@@ -50,27 +49,32 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             ~Q(image=""),
             slide__stool_sample__isnull=False,
             approved=True,
+            slide__stool_sample__id__in=stool_objects
         ).count()
         # total images pending approval
         context["total_images_pending_approval"] = (
             context["total_images_uploaded"] - context["total_images_approved"]
         )
         context["sample_type"] = "stool"
+        default_range = self.start_date + ' - ' + self.end_date
+        context['filter_form'] = FilterForm(default_range=default_range, province=self.province)
         return context
 
-    # def get_queryset(self) -> QuerySet[Any]:
-    #     return Stool.objects.annotate(
-    #         total_images=Count(
-    #             Q(
-    #                 stool_slides__slide_image__approved=True,
-    #             ),
-    #         ),
-    #         uploaded_images=Count(
-    #             ~Q(
-    #                 stool_slides__slide_image__image="",
-    #             )
-    #         ),
-    #     ).order_by("-id")
+    def get_queryset(self, **kwargs):
+        queryset = Stool.objects.all()
+        filter_range = self.request.GET.get('filter_date_range', '')
+        if filter_range:
+            self.start_date, self.end_date = filter_range.split(' - ')
+            print(filter_range.split(' - '))
+        else:
+            self.start_date = self.request.GET.get('from', '2020-01-01')
+            today_date = datetime.datetime.today().strftime('%Y-%m-%d')
+            self.end_date = self.request.GET.get('to', today_date)
+        queryset = queryset.filter(date_of_collection__range=[self.start_date, self.end_date])
+        self.province = self.request.GET.get('province', '')
+        if self.province:
+            queryset = queryset.filter(site__district__province__id=self.province)
+        return queryset
 
 
 class StoolFormView(

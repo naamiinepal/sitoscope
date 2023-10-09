@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "user",
     "annotation",
     "view_breadcrumbs",
+    "bootstrap_daterangepicker"
 ]
 
 MIDDLEWARE = [

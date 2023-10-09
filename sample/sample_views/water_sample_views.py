@@ -1,3 +1,4 @@
+import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
@@ -16,7 +17,7 @@ from view_breadcrumbs import (
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
-from sample.forms.standard_sample_form import SlideImagesForm
+from sample.forms.standard_sample_form import SlideImagesForm, FilterForm
 from sample.forms.water_sample_forms import WaterForm
 from sample.models import Slide, SlideImage, Water
 from sample.utils import create_sample_id
@@ -25,7 +26,6 @@ from sample.utils import create_sample_id
 # Create your views here
 @method_decorator(never_cache, name="dispatch")
 class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
-    queryset = Water.objects.order_by("-id")
     template_name: str = "sample/sample_home.html"
     context_object_name = "latest_samples_list"
     permission_required = "sample.view_water"
@@ -33,10 +33,12 @@ class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["sample_type"] = "water"
-        context["total_samples"] = Water.objects.count()
+
+        water_objects = self.object_list
+        context["total_samples"] = water_objects.count()
 
         context["total_images_uploaded"] = SlideImage.objects.filter(
-            ~Q(image=""), slide__water_sample__isnull=False
+            ~Q(image=""), slide__water_sample__isnull=False, slide__water_sample__id__in=water_objects
         ).count()
         # images remaining to upload
         context["total_images_remaining"] = (
@@ -47,12 +49,32 @@ class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             ~Q(image=""),
             slide__water_sample__isnull=False,
             approved=True,
+            slide__water_sample__id__in=water_objects
         ).count()
         # total images pending approval
         context["total_images_pending_approval"] = (
             context["total_images_uploaded"] - context["total_images_approved"]
         )
+        default_range = self.start_date + ' - ' + self.end_date
+        context['filter_form'] = FilterForm(default_range=default_range, province=self.province)
+
         return context
+
+    def get_queryset(self, **kwargs):
+        queryset = Water.objects.all()
+        filter_range = self.request.GET.get('filter_date_range', '')
+        if filter_range:
+            self.start_date, self.end_date = filter_range.split(' - ')
+            print(filter_range.split(' - '))
+        else:
+            self.start_date = self.request.GET.get('from', '2020-01-01')
+            today_date = datetime.datetime.today().strftime('%Y-%m-%d')
+            self.end_date = self.request.GET.get('to', today_date)
+        queryset = queryset.filter(date_of_collection__range=[self.start_date, self.end_date])
+        self.province = self.request.GET.get('province', '')
+        if self.province:
+            queryset = queryset.filter(site__district__province__id=self.province)
+        return queryset
 
 
 class WaterFormView(
