@@ -13,6 +13,7 @@ from view_breadcrumbs import (
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
+from django.core.exceptions import PermissionDenied
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
@@ -71,9 +72,15 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             today_date = datetime.datetime.today().strftime('%Y-%m-%d')
             self.end_date = self.request.GET.get('to', today_date)
         queryset = queryset.filter(date_of_collection__range=[self.start_date, self.end_date])
-        self.province = self.request.GET.get('province', '')
+
+        self.province = self.request.GET.get('province', "")
+        user_provinces = self.request.user.profile.provinces.all()
         if self.province:
+            if not user_provinces.filter(id=self.province):
+                raise PermissionDenied(f"No permission to view items from Province {self.province}")
             queryset = queryset.filter(site__district__province__id=self.province)
+        else:
+            queryset = queryset.filter(site__district__province__id__in=user_provinces)
         return queryset
 
 

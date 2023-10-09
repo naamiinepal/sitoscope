@@ -21,22 +21,26 @@
 {% with detail_url_name="sample:"|add:sample_type|add:"_detail" %}
 <h3 class="text-center">{{ sample_type|title }} Samples</h3>
 
-<div class="container">
-    {% with list_url="sample:"|add:sample_type|add:"_list" %}
-    <form action="{% url list_url %}" method="GET" >
-    {% endwith %}
-        <div class="row">
-        <div class="col">
-            
-        </div>
-        <div class="col">
-                {{ filter_form }}
+<div class="accordion" id="filterAccordion">
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="headingOne">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                aria-expanded="true" aria-controls="collapseOne">
+                Filter Samples
+            </button>
+        </h2>
+        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+            data-bs-parent="#filterAccordion">
+            <div class="accordion-body">
+                {% with list_url="sample:"|add:sample_type|add:"_list" %}
+                <form class="row g-3 row-cols-lg-auto" action="{% url list_url %}" method="GET">
+                {% endwith %}
+                    {{ filter_form }}
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
             </div>
-            <div class="col">
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </div>
         </div>
-    </form>
+    </div>
 </div>
 
 <div class="row">
