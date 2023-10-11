@@ -62,7 +62,7 @@ class StoolListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
 
     def get_queryset(self, **kwargs):
-        queryset = Stool.objects.all()
+        queryset = Stool.objects.all().order_by('-id')
         filter_range = self.request.GET.get('filter_date_range', '')
         if filter_range:
             self.start_date, self.end_date = filter_range.split(' - ')
