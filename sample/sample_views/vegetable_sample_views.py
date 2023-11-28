@@ -2,7 +2,7 @@ import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
@@ -14,6 +14,8 @@ from view_breadcrumbs import (
     CreateBreadcrumbMixin,
     DetailBreadcrumbMixin,
 )
+
+from django.core.exceptions import PermissionDenied
 
 from address.forms import AddressForm
 from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
@@ -33,12 +35,14 @@ class VegetableListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["sample_type"] = "vegetable"
 
         vegetable_objects = self.object_list
         context["total_samples"] = vegetable_objects.count()
+        # images uploaded for vegetable sample, filter all slide images whose slide is a vegetable sample and has an image
         context["total_images_uploaded"] = SlideImage.objects.filter(
-            ~Q(image=""), slide__vegetable_sample__isnull=False, slide__vegetable_sample__id__in=vegetable_objects
+            ~Q(image=""),
+            slide__vegetable_sample__isnull=False,
+            slide__vegetable_sample__id__in=vegetable_objects,
         ).count()
         # images remaining to upload
         context["total_images_remaining"] = (
@@ -49,30 +53,67 @@ class VegetableListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             ~Q(image=""),
             slide__vegetable_sample__isnull=False,
             approved=True,
-            slide__vegetable_sample__id__in=vegetable_objects
+            reviewed=True,
+            slide__vegetable_sample__id__in=vegetable_objects,
         ).count()
         # total images pending approval
-        context["total_images_pending_approval"] = (
-            context["total_images_uploaded"] - context["total_images_approved"]
+        context["total_images_pending_approval"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            slide__vegetable_sample__isnull=False,
+            reviewed=False,
+            slide__vegetable_sample__id__in=vegetable_objects,
+        ).count()
+        context["total_images_rejected"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            slide__vegetable_sample__isnull=False,
+            approved=False,
+            reviewed=True,
+            slide__vegetable_sample__id__in=vegetable_objects,
+        ).count()
+        context["sample_type"] = "vegetable"
+        default_range = self.start_date + " - " + self.end_date
+        context["filter_form"] = FilterForm(
+            default_range=default_range, province=self.province
         )
-        default_range = self.start_date + ' - ' + self.end_date
-        context['filter_form'] = FilterForm(default_range=default_range, province=self.province)
         return context
 
     def get_queryset(self, **kwargs):
-        queryset = Vegetable.objects.all().order_by('-id')
-        filter_range = self.request.GET.get('filter_date_range', '')
+        queryset = Vegetable.objects.all().order_by("-id")
+        filter_range = self.request.GET.get("filter_date_range", "")
         if filter_range:
-            self.start_date, self.end_date = filter_range.split(' - ')
-            print(filter_range.split(' - '))
+            self.start_date, self.end_date = filter_range.split(" - ")
+            print(filter_range.split(" - "))
         else:
-            self.start_date = self.request.GET.get('from', '2020-01-01')
-            today_date = datetime.datetime.today().strftime('%Y-%m-%d')
-            self.end_date = self.request.GET.get('to', today_date)
-        queryset = queryset.filter(date_of_collection__range=[self.start_date, self.end_date])
-        self.province = self.request.GET.get('province', '')
+            self.start_date = self.request.GET.get("from", "2020-01-01")
+            today_date = datetime.datetime.today().strftime("%Y-%m-%d")
+            self.end_date = self.request.GET.get("to", today_date)
+        queryset = queryset.filter(
+            date_of_collection__range=[self.start_date, self.end_date]
+        )
+
+        self.province = self.request.GET.get("province", "")
+        user_provinces = self.request.user.profile.provinces.all()
         if self.province:
+            if not user_provinces.filter(id=self.province):
+                raise PermissionDenied(
+                    f"No permission to view items from Province {self.province}"
+                )
             queryset = queryset.filter(site__district__province__id=self.province)
+        else:
+            queryset = queryset.filter(site__district__province__id__in=user_provinces)
+
+        queryset = queryset.annotate(
+            total_uploaded=Count(
+                "vegetable_slides__slide_image",
+                Q(vegetable_slides__slide_image__isnull=False)
+                & ~Q(vegetable_slides__slide_image__image=""),
+            ),
+            total_reviewed=Count(
+                "vegetable_slides__slide_image",
+                Q(vegetable_slides__slide_image__isnull=False)
+                & Q(vegetable_slides__slide_image__reviewed=True),
+            ),
+        )
         return queryset
 
 
@@ -150,21 +191,56 @@ class VegetableDetailView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        slides = Slide.objects.filter(vegetable_sample=self.get_object())
-        for slide in slides:
-            slide.smartphone_images_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="S"
-            ).count()
-            slide.smartphone_images_approved_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="S", approved=True
-            ).count()
-
-            slide.brightfield_images_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="B"
-            ).count()
-            slide.brightfield_images_approved_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="B", approved=True
-            ).count()
+        slides = Slide.objects.filter(vegetable_sample=self.get_object()).annotate(
+            smartphone_images_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="") & Q(slide_image__image_type="S"),
+            ),
+            smartphone_images_approved_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__approved=True)
+                & Q(slide_image__reviewed=True),
+            ),
+            smartphone_images_rejected_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__approved=False)
+                & Q(slide_image__reviewed=True),
+            ),
+            smartphone_images_not_reviewed_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__reviewed=False),
+            ),
+            brightfield_images_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="") & Q(slide_image__image_type="B"),
+            ),
+            brightfield_images_approved_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__approved=True)
+                & Q(slide_image__reviewed=True),
+            ),
+            brightfield_images_rejected_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__approved=False)
+                & Q(slide_image__reviewed=True),
+            ),
+            brightfield_images_not_reviewed_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__reviewed=False),
+            ),
+        )
         context["slides"] = slides
         context["sample_type"] = "vegetable"
         return context

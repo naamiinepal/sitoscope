@@ -56,7 +56,9 @@
                     <th scope="col">Images Uploaded</th>
                     <th scope="col">Remaining to Upload</th>
                     <th scope="col">Approved</th>
-                    <th scope="col">Not Approved</th>
+                    <th scope="col">Rejected</th>
+                    <th scope="col">Not Reviewed</th>
+
                 </thead>
                 <tbody>
                     <tr>
@@ -64,6 +66,7 @@
                         <td>{{ total_images_uploaded }}</td>
                         <td>{{ total_images_remaining }}</td>
                         <td>{{ total_images_approved }}</td>
+                        <td>{{ total_images_rejected }}</td>
                         <td>{{ total_images_pending_approval }}</td>
                     </tr>
                 </tbody>
@@ -91,6 +94,9 @@
             <th scope="col">#</th>
             <th scope="col">Sample ID</th>
             <th scope="col">Date of collection</th>
+            <th scope="col">Uploaded</th>
+            <th scope="col">Reviewed</th>
+
         </thead>
         <tbody>
             {% for sample in latest_samples_list %}
@@ -101,6 +107,8 @@
                         class="text-break text-decoration-none">{{sample.sample_id}}</a>
                 </td>
                 <td>{{ sample.date_of_collection }}</td>
+                <td>{{ sample.total_uploaded }}</td>
+                <td>{{ sample.total_reviewed }}</td>
             </tr>
             {% endfor %}
         </tbody>

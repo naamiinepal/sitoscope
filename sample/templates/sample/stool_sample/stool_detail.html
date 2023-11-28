@@ -3,38 +3,40 @@
 {% block sample_detail %}
 <table class="table">
     <tbody>
-        <tr>
-            <td>Date of collection</td>
-            <th scope="row">{{ sample.date_of_collection }}</th>
-        </tr>
-        <tr>
-            <td>Province</td>
-            <th scope="row">{{ sample.site.district.province.name }}</th>
-        </tr>
-        <tr>
-            <td>District</td>
-            <th scope="row">{{ sample.site.district.name }}</th>
-        </tr>
-        <tr>
-            <td>Municipality/GaunPalika</td>
-            <th scope="row">{{ sample.site.name }}</th>
-        </tr>
-        <tr>
-            <td>Patient's Gender</td>
-            <th scope="row">{{ sample.get_gender_display }}</th>
-        </tr>
-        <tr>
-            <td>Patient's Age</td>
-            <th scope="row">{{ sample.age }}</th>
-        </tr>
-        <tr>
-            <td>Symptoms</td>
-            <th scope="row">{{ sample.symptoms }}</th>
-        </tr>
-        <tr>
-            <td>Stool Texture</td>
-            <th scope="row">{{ sample.stool_texture }}</th>
-        </tr>
+        <div class="text-wrap">
+            <tr>
+                <td>Date of collection</td>
+                <th scope="row">{{ sample.date_of_collection }}</th>
+            </tr>
+            <tr>
+                <td>Province</td>
+                <th scope="row">{{ sample.site.district.province.name }}</th>
+            </tr>
+            <tr>
+                <td>District</td>
+                <th scope="row">{{ sample.site.district.name }}</th>
+            </tr>
+            <tr>
+                <td>Municipality/GaunPalika</td>
+                <th scope="row">{{ sample.site.name }}</th>
+            </tr>
+            <tr>
+                <td>Patient's Gender</td>
+                <th scope="row">{{ sample.get_gender_display }}</th>
+            </tr>
+            <tr>
+                <td>Patient's Age</td>
+                <th scope="row">{{ sample.age }}</th>
+            </tr>
+            <tr>
+                <td>Symptoms</td>
+                <th scope="row">{{ sample.symptoms }}</th>
+            </tr>
+            <tr>
+                <td>Stool Texture</td>
+                <th scope="row">{{ sample.stool_texture }}</th>
+            </tr>
+        </div>
         
     </tbody>
 </table>

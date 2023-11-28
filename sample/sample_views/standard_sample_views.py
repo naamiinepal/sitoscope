@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.files.images import ImageFile
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
@@ -30,6 +30,9 @@ class StandardListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        standard_objects = self.object_list
+
         context["sample_type"] = "standard"
         context["total_samples"] = Standard.objects.count()
 
@@ -45,12 +48,41 @@ class StandardListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             ~Q(image=""),
             slide__standard_sample__isnull=False,
             approved=True,
+            reviewed=True,
+            slide__standard_sample__id__in=standard_objects,
         ).count()
         # total images pending approval
-        context["total_images_pending_approval"] = (
-            context["total_images_uploaded"] - context["total_images_approved"]
-        )
+        context["total_images_pending_approval"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            slide__standard_sample__isnull=False,
+            reviewed=False,
+            slide__standard_sample__id__in=standard_objects,
+        ).count()
+        context["total_images_rejected"] = SlideImage.objects.filter(
+            ~Q(image=""),
+            slide__standard_sample__isnull=False,
+            approved=False,
+            reviewed=True,
+            slide__standard_sample__id__in=standard_objects,
+        ).count()
         return context
+
+    def get_queryset(self, **kwargs):
+        queryset = Standard.objects.all().order_by("-id")
+
+        queryset = queryset.annotate(
+            total_uploaded=Count(
+                "standard_slides__slide_image",
+                Q(standard_slides__slide_image__isnull=False)
+                & ~Q(standard_slides__slide_image__image=""),
+            ),
+            total_reviewed=Count(
+                "standard_slides__slide_image",
+                Q(standard_slides__slide_image__isnull=False)
+                & Q(standard_slides__slide_image__reviewed=True),
+            ),
+        )
+        return queryset
 
 
 class StandardFormView(
@@ -111,21 +143,56 @@ class StandardDetailView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        slides = Slide.objects.filter(standard_sample=self.get_object())
-        for slide in slides:
-            slide.smartphone_images_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="S"
-            ).count()
-            slide.smartphone_images_approved_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="S", approved=True
-            ).count()
-
-            slide.brightfield_images_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="B"
-            ).count()
-            slide.brightfield_images_approved_count = SlideImage.objects.filter(
-                ~Q(image=""), slide=slide.id, image_type="B", approved=True
-            ).count()
+        slides = Slide.objects.filter(standard_sample=self.get_object()).annotate(
+            smartphone_images_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="") & Q(slide_image__image_type="S"),
+            ),
+            smartphone_images_approved_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__approved=True)
+                & Q(slide_image__reviewed=True),
+            ),
+            smartphone_images_rejected_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__approved=False)
+                & Q(slide_image__reviewed=True),
+            ),
+            smartphone_images_not_reviewed_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="S")
+                & Q(slide_image__reviewed=False),
+            ),
+            brightfield_images_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="") & Q(slide_image__image_type="B"),
+            ),
+            brightfield_images_approved_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__approved=True)
+                & Q(slide_image__reviewed=True),
+            ),
+            brightfield_images_rejected_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__approved=False)
+                & Q(slide_image__reviewed=True),
+            ),
+            brightfield_images_not_reviewed_count=Count(
+                "slide_image",
+                ~Q(slide_image__image="")
+                & Q(slide_image__image_type="B")
+                & Q(slide_image__reviewed=False),
+            ),
+        )
         context["slides"] = slides
         context["sample_type"] = "standard"
         return context

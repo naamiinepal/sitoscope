@@ -222,6 +222,9 @@ class SlideImage(models.Model):
         related_name="approved_by",
     )
 
+    reviewed = models.BooleanField(default=False)
+    comment = models.TextField(blank=True)
+
     class Meta:
         constraints = [
             models.CheckConstraint(

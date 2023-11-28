@@ -15,6 +15,7 @@ const approve = (id) => {
         body: JSON.stringify({
             id: id,
             approved: true,
+            reviewed: true
         }),
 
     })
@@ -56,6 +57,7 @@ const reject = (id) => {
         body: JSON.stringify({
             id: id,
             approved: false,
+            reviewed: true
         }),
     })
         .then(response => response.json())
@@ -68,7 +70,7 @@ const reject = (id) => {
                 <small class="card-text text-danger">${data['image_id']}</small>
                 <span class="badge text-danger">
                     <i class="bi bi-x-circle-fill"></i>
-                    Not Approved
+                    Rejected
                 </span>
                 <div>
                     <button type="button" class="btn btn-outline-success btn-sm approve-btn"
@@ -101,3 +103,29 @@ reject_btns.forEach(btn => {
         reject(id);
     });
 });
+
+// const reviewModal = document.getElementById('reviewModal')
+// if (reviewModal) {
+//     reviewModal.addEventListener('show.bs.modal', event => {
+//         // Button that triggered the modal
+//         const button = event.relatedTarget
+//         // Extract info from data-bs-* attributes
+//         const image_id = button.getAttribute('data-bs-whatever')
+//         const action = button.getAttribute('data-bs-review')
+//         // If necessary, you could initiate an Ajax request here
+//         // and then do the updating in a callback.
+
+//         // Update the modal's content.
+//         const modalTitle = reviewModal.querySelector('.modal-title')
+//         const modalBodyInput = reviewModal.querySelector('.modal-body input')
+
+//         modalTitle.textContent = `${action.charAt(0).toUpperCase()
+//             + action.slice(1)} ${image_id}`
+//         modalBodyInput.value = image_id
+//         modalBodyInput.disabled = true
+
+//         const submitButton = reviewModal.querySelector('.modal-footer button #action')
+//         submitButton.value = action.charAt(0).toUpperCase()
+//             + action.slice(1)
+//     })
+// }
