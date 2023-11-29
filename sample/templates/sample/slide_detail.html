@@ -80,11 +80,27 @@
                             data-bs-whatever="{{ image.image_id }}" data-bs-review="approve">Approve</button>
                         <button type="button" class="btn btn-outline-danger btn-sm reject-btn"
                             id="reject-btn-{{image.id}}" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                            data-bs-whatever="{{ image.image_id }}" data-bs-review="reject" >Reject</button>
+                            data-bs-whatever="{{ image.image_id }}" data-bs-review="reject">Reject</button>
                     </div>
 
                     {% endif %}
                 </div>
+                {% endif %}
+
+                {% if perms.sample.change_slideimage %}
+                <div class="input-group m-3">
+                    <textarea class="form-control" aria-label="Comment"
+                        id="comment-{{ image.id }}">{{ image.comment }}</textarea>
+                    <button class="btn btn-outline-secondary m-2 comment-btn" type="button"
+                        id="comment-btn-{{ image.id }}">Comment</button>
+                </div>
+                {% else %}
+                    {% if image.comment %}
+                    <span class="badge text-secondary">
+                        Remarks:
+                    </span>
+                    <small class="card-text text-secondary">{{image.comment}}</small>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -121,6 +137,18 @@
 
         <div class="toast-body">
             The image has been rejected.
+        </div>
+    </div>
+
+    <div class="toast align-items-center text-bg-warning border-0" id="commentToast" class="toast" role="alert"
+        aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <strong class="me-auto">Comment</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+
+        <div class="toast-body">
+            Comment updated for the image.
         </div>
     </div>
 </div>

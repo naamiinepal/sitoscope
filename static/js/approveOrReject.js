@@ -1,8 +1,11 @@
 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 const approve_btns = document.querySelectorAll('.approve-btn');
 const reject_btns = document.querySelectorAll('.reject-btn');
+const comment_btns = document.querySelectorAll('.comment-btn');
 const approved_toast = document.getElementById('approvedToast');
 const rejected_toast = document.getElementById('rejectedToast');
+const comment_toast = document.getElementById('commentToast');
+
 
 const approve = (id) => {
     const url = `/api/samples/slideimage/${id}/`;
@@ -87,6 +90,33 @@ const reject = (id) => {
         });
 }
 
+const comment = (id) => {
+    const url = `/api/samples/slideimage/${id}/`;
+    const comment = document.getElementById(`comment-${id}`);
+    console.log(comment)
+    fetch(url, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({
+            id: id,
+            comment: comment.value,
+        }),
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Comment:', data);
+
+            const bsAlert = new bootstrap.Toast(comment_toast);
+            bsAlert.show();
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
 approve_btns.forEach(btn => {
     btn.addEventListener('click', () => {
         const btn_id = btn.id;
@@ -100,7 +130,17 @@ reject_btns.forEach(btn => {
     btn.addEventListener('click', () => {
         const btn_id = btn.id;
         const id = btn_id.split('-').slice(-1)[0];
+        console.log(id)
         reject(id);
+    });
+});
+
+comment_btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const btn_id = btn.id;
+        const id = btn_id.split('-').slice(-1)[0];
+        console.log(id)
+        comment(id);
     });
 });
 
