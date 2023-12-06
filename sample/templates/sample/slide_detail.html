@@ -34,7 +34,8 @@
     <div class="col-lg-6">
         <div class="card m-2">
             <img src="{{ image.image.url }}" class="img-thumbnail rounded card-img card-img-top"
-                alt="{{ image.image_id }}" id="{{ image.image_id }}" width="640" height="480">
+                alt="{{ image.image_id }}" id="{{ image.image_id }}" width="640" height="480" data-bs-toggle="modal"
+                data-bs-target="#fullScreenModal" data-img-id="{{ image.image_id }}">
             <div class="card-body text-center">
                 {% if image.reviewed %}
                 <div id="div-{{ image.image_id }}">
@@ -95,12 +96,12 @@
                         id="comment-btn-{{ image.id }}">Comment</button>
                 </div>
                 {% else %}
-                    {% if image.comment %}
-                    <span class="badge text-secondary">
-                        Remarks:
-                    </span>
-                    <small class="card-text text-secondary">{{image.comment}}</small>
-                    {% endif %}
+                {% if image.comment %}
+                <span class="badge text-secondary">
+                    Remarks:
+                </span>
+                <small class="card-text text-secondary">{{image.comment}}</small>
+                {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -153,10 +154,52 @@
     </div>
 </div>
 
+<div class="modal fade" id="fullScreenModal" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="fullScreenModalLabel">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <img src="" alt="" height="100%" width="100%">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+</div>
+
+
+
 {% endblock %}
 
 
 {% block script %}
+
+<script>
+
+var exampleModal = document.getElementById('fullScreenModal')
+exampleModal.addEventListener('show.bs.modal', function (event) {
+  // Button that triggered the modal
+  var img = event.relatedTarget
+  // Extract info from data-bs-* attributes
+  var id = img.getAttribute('data-img-id')
+  // If necessary, you could initiate an AJAX request here
+  // and then do the updating in a callback.
+  //
+  // Update the modal's content.
+  var modalTitle = exampleModal.querySelector('.modal-title')
+  var modalBodyImg = exampleModal.querySelector('.modal-body img')
+
+  modalTitle.textContent = id
+  modalBodyImg.src = img.getAttribute('src')
+})
+
+
+</script>
+
 <script src="{% static 'js/buttonSpinner.js' %}"></script>
 <script src="{% static 'js/approveOrReject.js' %}"></script>
 
