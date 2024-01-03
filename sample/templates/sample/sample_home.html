@@ -7,10 +7,10 @@
 
 {% block head %}
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.30/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker@3.1/daterangepicker.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker@3.1/daterangepicker.min.css">
 
 {% endblock %}
 
@@ -32,14 +32,23 @@
         <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
             data-bs-parent="#filterAccordion">
             <div class="accordion-body">
-                {% with list_url="sample:"|add:sample_type|add:"_list" %}
-                <form class="row g-3 row-cols-lg-auto" action="{% url list_url %}" method="GET">
-                {% endwith %}
-                    {{ filter_form }}
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                </form>
+                <div class="row">
+                    <div class="col col-9">
+                        {% with list_url="sample:"|add:sample_type|add:"_list" %}
+                        <form class="row g-3 row-cols-lg-auto" action="{% url list_url %}" method="GET">
+                            {% endwith %}
+                            {{ filter_form }}
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </form>
+                    </div>
+                    <div class="col col-3">
+
+                        <button type="submit" class="btn btn-secondary m-3" id="exportCsv">Export to CSV</button>
+                    </div>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -89,7 +98,7 @@
 {% endif %}
 {% if latest_samples_list %}
 <div class="table-responsive">
-    <table class="table">
+    <table class="table" id="sampleTable">
         <thead>
             <th scope="col">#</th>
             <th scope="col">Sample ID</th>
@@ -132,4 +141,35 @@
 
 {% endwith %}
 {% endwith %}
+{% endblock %}
+
+{% block script %}
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const exportCsvButton = document.getElementById('exportCsv');
+
+        exportCsvButton.addEventListener('click', function () {
+            const tableData = [];
+            const rows = document.querySelectorAll("#sampleTable tr");
+
+            rows.forEach(row => {
+                const rowData = Array.from(row.cells).map(cell => cell.innerText);
+                tableData.push(rowData.join(";"));
+            });
+
+            const data = tableData.join("\n");
+
+            const downloadLink = document.createElement('a');
+            downloadLink.setAttribute('download', 'data.csv');
+            downloadLink.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(data));
+            downloadLink.style.display = 'none';
+            document.body.appendChild(downloadLink);
+
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        });
+    });
+
+</script>
 {% endblock %}
