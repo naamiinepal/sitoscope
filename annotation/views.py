@@ -91,7 +91,6 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
         "labels": dumps(LABELS),
         "has_cyst": annotation.has_cyst,
     }
-    print(dumps(LABELS))
 
     return render(
         request=request, template_name="annotation/via_annotation.html", context=context

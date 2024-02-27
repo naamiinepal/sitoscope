@@ -49,7 +49,7 @@
                     <div>
                         <button type="button" class="btn btn-outline-danger btn-sm reject-btn"
                             id="reject-btn-{{image.id}}" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                            data-bs-whatever="{{ image.image_id }}" data-bs-review="reject">Reject</button>
+                            data-imageid="{{ image.image_id }}" data-bs-review="reject">Reject</button>
                     </div>
                     {% endif %}
                     {% else %}
@@ -62,7 +62,7 @@
                     <div>
                         <button type="button" class="btn btn-outline-success btn-sm approve-btn"
                             id="approve-btn-{{image.id}}" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                            data-bs-whatever="{{ image.image_id }}" data-bs-review="approve">Approve</button>
+                            data-imageid="{{ image.image_id }}" data-bs-review="approve">Approve</button>
                     </div>
                     {% endif %}
                     {% endif %}
@@ -78,10 +78,10 @@
                     <div>
                         <button type="button" class="btn btn-outline-success btn-sm approve-btn"
                             id="approve-btn-{{image.id}}" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                            data-bs-whatever="{{ image.image_id }}" data-bs-review="approve">Approve</button>
+                            data-imageid="{{ image.image_id }}" data-bs-review="approve">Approve</button>
                         <button type="button" class="btn btn-outline-danger btn-sm reject-btn"
                             id="reject-btn-{{image.id}}" data-bs-toggle="modal" data-bs-target="#reviewModal"
-                            data-bs-whatever="{{ image.image_id }}" data-bs-review="reject">Reject</button>
+                            data-imageid="{{ image.image_id }}" data-bs-review="reject">Reject</button>
                     </div>
 
                     {% endif %}
@@ -91,9 +91,9 @@
                 {% if perms.sample.change_slideimage %}
                 <div class="input-group m-3">
                     <textarea class="form-control" aria-label="Comment"
-                        id="comment-{{ image.id }}">{{ image.comment }}</textarea>
+                        id="comment-{{ image.image_id }}">{{ image.comment }}</textarea>
                     <button class="btn btn-outline-secondary m-2 comment-btn" type="button"
-                        id="comment-btn-{{ image.id }}">Comment</button>
+                        id="comment-btn-{{ image.id }}" data-imageid="{{ image.image_id }}">Comment</button>
                 </div>
                 {% else %}
                 {% if image.comment %}

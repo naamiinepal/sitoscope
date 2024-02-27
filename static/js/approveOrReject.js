@@ -119,28 +119,28 @@ const comment = (id) => {
 
 approve_btns.forEach(btn => {
     btn.addEventListener('click', () => {
-        const btn_id = btn.id;
-        const id = btn_id.split('-').slice(-1)[0];
-        console.log(id);
-        approve(id);
+        const btn_id = btn.dataset.imageid;
+        // const id = btn_id.split('-').slice(-1)[0];
+        // console.log(id);
+        approve(btn_id);
     });
 });
 
 reject_btns.forEach(btn => {
     btn.addEventListener('click', () => {
-        const btn_id = btn.id;
-        const id = btn_id.split('-').slice(-1)[0];
-        console.log(id)
-        reject(id);
+        const btn_id = btn.dataset.imageid;
+        // const id = btn_id.split('-').slice(-1)[0];
+        // console.log(id)
+        reject(btn_id);
     });
 });
 
 comment_btns.forEach(btn => {
     btn.addEventListener('click', () => {
-        const btn_id = btn.id;
-        const id = btn_id.split('-').slice(-1)[0];
-        console.log(id)
-        comment(id);
+        const btn_id = btn.dataset.imageid;
+        // const id = btn_id.split('-').slice(-1)[0];
+        // console.log(id)
+        comment(btn_id);
     });
 });
 
