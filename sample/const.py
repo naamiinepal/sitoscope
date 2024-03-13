@@ -46,3 +46,6 @@ STANDARD_SAMPLE_SLIDE_COUNT = 25
 
 # Number of images per slide
 IMAGE_COUNT = 15
+
+# Sample default time filter start
+DEFAULT_FILTER_RANGE_START = "2021-01-01"

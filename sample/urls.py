@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from sample import views
 from sample.sample_views import (
+    filter_views,
     standard_sample_views,
     stool_sample_views,
     vegetable_sample_views,
@@ -121,5 +122,8 @@ urlpatterns = [
         "stool-samples/<slug:sample_id>/<slug:slide_number>/<slug:image_type>",
         stool_sample_views.StoolSlideImageDetailView.as_view(),
         name="stool_slide_image",
+    ),
+    path(
+        "samples/filter/", filter_views.FilterSamples.as_view(), name="filter_samples"
     ),
 ]

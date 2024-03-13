@@ -19,7 +19,7 @@ from django.core.exceptions import PermissionDenied
 
 
 from address.forms import AddressForm
-from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT
+from sample.const import IMAGE_COUNT, IMAGE_TYPE_CHOICES, SLIDE_COUNT, DEFAULT_FILTER_RANGE_START
 from sample.forms.standard_sample_form import SlideImagesForm, FilterForm
 from sample.forms.water_sample_forms import WaterForm
 from sample.models import Slide, SlideImage, Water
@@ -85,7 +85,7 @@ class WaterListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             self.start_date, self.end_date = filter_range.split(" - ")
             print(filter_range.split(" - "))
         else:
-            self.start_date = self.request.GET.get("from", "2020-01-01")
+            self.start_date = self.request.GET.get("from", DEFAULT_FILTER_RANGE_START)
             today_date = datetime.datetime.today().strftime("%Y-%m-%d")
             self.end_date = self.request.GET.get("to", today_date)
         queryset = queryset.filter(
