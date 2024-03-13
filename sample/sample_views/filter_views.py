@@ -13,7 +13,6 @@ from rest_framework.views import APIView
 
 from address.models import Province
 from sample.const import DEFAULT_FILTER_RANGE_START, STANDARD_SAMPLE_TYPES
-from sample.forms.standard_sample_form import SamplesFilterForm
 from sample.models import Stool, Vegetable, Water
 
 
