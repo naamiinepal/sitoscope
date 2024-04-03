@@ -49,3 +49,6 @@ IMAGE_COUNT = 15
 
 # Sample default time filter start
 DEFAULT_FILTER_RANGE_START = "2021-01-01"
+
+# number of samples for each image type to annotate for inter-annotator analysis
+COMMON_ANNOTATION_SAMPLES = 100

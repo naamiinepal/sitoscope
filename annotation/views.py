@@ -212,7 +212,7 @@ def change_image(request: HttpRequest) -> HttpResponse:
             **kwargs,
             image__image_type=image.image_type,
             annotator=annotator,
-            annotated=False,
+            annotated=annotation.annotated,
         )
         .order_by(order_by)
         .first()
