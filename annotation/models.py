@@ -23,3 +23,11 @@ class Annotation(models.Model):
     has_cyst = models.BooleanField(default=False)
     annotated = models.BooleanField(default=False)
     annotated_on = models.DateTimeField(null=True, blank=True)
+
+    # constraint for unique (image, annotator) pair
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["image", "annotator"], name="unique_image_annotator_pair"
+            )
+        ]
