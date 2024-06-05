@@ -18,6 +18,7 @@ def assign_annotations(
     reference_annotator_username: Optional[str] = None,
     assign_common: bool = True,
     limit: int = COMMON_ANNOTATION_SAMPLES,
+    annotation_phase: str = "common",
 ):
     """
     A function that assigns annotations to annotators based on certain conditions.
@@ -26,6 +27,7 @@ def assign_annotations(
         reference_annotator_username: An optional string representing the reference annotator username.
         assign_common: A boolean indicating whether to assign common annotations.
         limit: An integer specifying the limit of common annotations to assign.
+        phase: A string representing the phase of the assignment.
     Returns:
         None
     """
@@ -67,7 +69,11 @@ def assign_annotations(
 
             annotations.extend(
                 (
-                    Annotation(image=slide_image, annotator=annotator)
+                    Annotation(
+                        image=slide_image,
+                        annotator=annotator,
+                        annotation_phase=annotation_phase,
+                    )
                     for annotator in annotators
                     for slide_image in slide_images_to_assign
                 )
@@ -105,7 +111,11 @@ def assign_annotations(
                 )
 
                 anno = tuple(
-                    Annotation(image=slide_image, annotator=annotator)
+                    Annotation(
+                        image=slide_image,
+                        annotator=annotator,
+                        annotation_phase=annotation_phase,
+                    )
                     for slide_image in slide_images_to_assign
                 )
 
@@ -171,6 +181,10 @@ if __name__ == "__main__":
         help="Number of common annotations to assign",
         type=int,
         default=COMMON_ANNOTATION_SAMPLES,
+    )
+
+    parser.add_argument(
+        "-p", "--annotation-phase", help="Annotation phase", type=str, required=True
     )
 
     args = parser.parse_args()
