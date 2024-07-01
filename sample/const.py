@@ -18,6 +18,7 @@ WATER_TYPE_CHOICES = [
     ("BR", "Tap (Boring)"),
     ("FL", "Tap (Filter)"),
     ("WT", "Tap (Water Tank)"),
+    ("TP", "Tap Water")
 ]
 
 VEGETABLE_CHOICES = [
