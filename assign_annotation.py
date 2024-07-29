@@ -102,7 +102,7 @@ def assign_annotations(
                 )
                 raise ValueError(msg)
 
-            for annotator in annotator:
+            for annotator in annotators:
                 # Slide Images to assign changes for each annotator ()
                 slide_images_to_assign = get_random_slide_images(
                     filter_query=filter_query,

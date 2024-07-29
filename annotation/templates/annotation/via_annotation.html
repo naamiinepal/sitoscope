@@ -576,9 +576,22 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
             <button style="padding: 5px; margin: 5px;" onclick="change_image('previous')">Previous</button>
             <button style="padding: 5px; margin: 5px;" onclick="change_image('next')">Next</button>
           </div>
+          {% if annotated %}
           <div>
-            <button style="padding: 5px; margin: 5px;" onclick="no_cyst_present()">No Cysts Present</button>
+            <p>Image already annotated.</p>
+            {% if has_cyst %}
+            <h3 style="padding: 5px; margin: 5px;">
+              Cyst Present
+            </h3>
+            {% else %}
+            <h3 style="padding: 5px; margin: 5px;">
+              Cyst not present
+            </h3>
+            {% endif %}
           </div>
+          {% else %}
+          <button style="padding: 5px; margin: 5px;" onclick="no_cyst_present()">No Cysts Present</button>
+          {% endif %}
         <!-- Change End -->
 
         <button class="leftsidebar_accordion active">Region Shape</button>
@@ -1230,7 +1243,7 @@ var VIA_REGION_SHAPES_POINTS_RADIUS = 3;
 var VIA_REGION_POINT_RADIUS         = 3;
 var VIA_REGION_POINT_RADIUS_DEFAULT = 3;
 
-var VIA_THEME_REGION_BOUNDARY_WIDTH = 3;
+var VIA_THEME_REGION_BOUNDARY_WIDTH = 3 ;
 var VIA_THEME_BOUNDARY_LINE_COLOR   = "black";
 var VIA_THEME_BOUNDARY_FILL_COLOR   = "yellow";
 var VIA_THEME_SEL_REGION_FILL_COLOR = "#808080";
@@ -2939,12 +2952,12 @@ function _via_reg_canvas_mousedown_handler(e) {
 
   // Comment Start
   // Author: Manish Dhakal
-  // var region_id = is_inside_region(_via_click_x0, _via_click_y0);
+  var region_id = is_inside_region(_via_click_x0, _via_click_y0, true);
   // Comment End
 
   // Change Start
   // Author: Manish Dhakal
-  var region_id = is_inside_region(_via_click_x0, _via_click_y0, true);
+  // var region_id = is_inside_region(_via_click_x0, _via_click_y0, true);
   // Change End
 
   if ( _via_is_region_selected ) {
@@ -10906,11 +10919,13 @@ function settings_show_current_value() {
 }
 
 function settings_region_visualisation_update_options() {
-  var region_setting_list = {'region_label': {
+  var region_setting_list = {
+    'region_label': {
     'default_option':'__via_region_id__',
     'default_label':'Region id (1, 2, ...)',
     'label_prefix':'Show value of region attribute: ',
-  }, 'region_color': {
+  }, 
+  'region_color': {
     'default_option':'__via_default_region_color__',
     'default_label':'Default Region Colour',
     'label_prefix':'Based on value of region attribute: ',

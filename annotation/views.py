@@ -28,35 +28,45 @@ def annotation_home(request: HttpRequest):
 
     annotations = Annotation.objects.filter(
         annotator__user=request.user, annotated=True
-    ).prefetch_related("image")
+    ).prefetch_related("image").order_by('image__image_id')
 
     not_annotated_images = Annotation.objects.filter(
         annotator__user=request.user, annotated=False
-    ).prefetch_related("image")
+    ).prefetch_related("image").order_by("image__image_id")
 
     # filter out smartphone and brightfield images
     brightfield_annotated = annotations.exclude(image__image_type="S")
     brightfield_not_annotated = not_annotated_images.exclude(image__image_type="S")
+    brightfield_positively_annotated = brightfield_annotated.exclude(has_cyst=False)
 
     smartphone_annotated = annotations.exclude(image__image_type="B")
     smartphone_not_annotated = not_annotated_images.exclude(image__image_type="B")
+    smartphone_positively_annotated = smartphone_annotated.exclude(has_cyst=False)
+
 
     annotated_count_brightfield = brightfield_annotated.count()
     not_annotated_count_brightfield = brightfield_not_annotated.count()
+    positively_annotated_count_brightfield = brightfield_positively_annotated.count()
 
     annotated_count_smartphone = smartphone_annotated.count()
     not_annotated_count_smartphone = smartphone_not_annotated.count()
+    positively_annotated_count_smartphone = smartphone_positively_annotated.count()
 
     context = {
         "images": {
             "brightfield_annotated": brightfield_annotated,
             "brightfield_not_annotated": brightfield_not_annotated,
+            "brightfield_positively_annotated": brightfield_positively_annotated,
             "smartphone_annotated": smartphone_annotated,
             "smartphone_not_annotated": smartphone_not_annotated,
+            "smartphone_positively_annotated": smartphone_positively_annotated,
             "annotated_count_brightfield": annotated_count_brightfield,
             "not_annotated_count_brightfield": not_annotated_count_brightfield,
             "annotated_count_smartphone": annotated_count_smartphone,
             "not_annotated_count_smartphone": not_annotated_count_smartphone,
+            "positively_annotated_count_brightfield": positively_annotated_count_brightfield,
+            "positively_annotated_count_smartphone": positively_annotated_count_smartphone
+            
         },
         "media_path": settings.MEDIA_URL,
     }
@@ -90,6 +100,7 @@ def via_get(request: HttpRequest, img: str) -> HttpResponse:
         "media_path": settings.MEDIA_URL,
         "labels": dumps(LABELS),
         "has_cyst": annotation.has_cyst,
+        "annotated": annotation.annotated
     }
 
     return render(
@@ -200,23 +211,30 @@ def change_image(request: HttpRequest) -> HttpResponse:
             status=404,
             content="Either the annotation does not exist or you are not assigned this annotation.",
         )
+    
 
+    order_by = "image__image_id"
     if step == "next":
-        kwargs = dict(id__gt=annotation.id)
+        new_image = (
+                Annotation.objects.filter(
+                    image__image_id__gt=image.image_id,
+                    image__image_type=image.image_type,
+                    annotator=annotator,
+                )
+                .order_by(order_by)
+                .first()
+            )
     else:
-        kwargs = dict(id__lt=annotation.id)
-    order_by = "id"
-
-    new_image = (
-        Annotation.objects.filter(
-            **kwargs,
-            image__image_type=image.image_type,
-            annotator=annotator,
-            annotated=annotation.annotated,
+        new_image = (
+            Annotation.objects.filter(
+                image__image_id__lt=image.image_id,
+                image__image_type=image.image_type,
+                annotator=annotator,
+            )
+            .order_by(order_by)
+            .last()
         )
-        .order_by(order_by)
-        .first()
-    )
+
 
     if new_image is None:
         return HttpResponse(status=404, content="No more images in this category.")

@@ -72,6 +72,12 @@ Parasitoscope Annotation
               Annotated
             </button>
           </li>
+
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="positively-annotated-tab-brightfield" data-bs-toggle="tab" data-bs-target="#yes-annot-brightfield-positively" type="button"
+              role="tab" aria-controls="yes-annot-brightfield-positively" aria-selected="false">
+              Positively Annotated
+            </button>
         </ul>
         </div>
 
@@ -81,7 +87,7 @@ Parasitoscope Annotation
             <table id="myTableNotAnnotatedBrightfield" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                 </tr>
               </thead>
               <tbody>
@@ -98,7 +104,7 @@ Parasitoscope Annotation
               </tbody>
               <tfoot>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                 </tr>
               </tfoot>
             </table>
@@ -107,7 +113,7 @@ Parasitoscope Annotation
             <table id="myTableAnnotatedBrightfield" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                   <th>Annotation Date</th>
                   <th>Cysts</th>
                 </tr>
@@ -135,13 +141,53 @@ Parasitoscope Annotation
               </tbody>
               <tfoot>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                   <th>Annotation Date</th>
                   <th>Cysts</th>
                 </tr>
               </tfoot>
             </table>
           </div>
+        </div>
+
+        <div class="tab-pane fade" id="yes-annot-brightfield-positively" role="tabpanel" aria-labelledby="positively-annnotated-brightfield-tab">
+          <table id="myTablePositivelyAnnotatedBrightfield" class="display fw-bold" style="width: 100%">
+            <thead>
+              <tr>
+                <th>Image ID</th>
+                <th>Annotation Date</th>
+                <th>Cysts</th>
+              </tr>
+            </thead>
+            <tbody>
+              {%for ann in images.brightfield_positively_annotated%}
+                  <tr>
+                    <td>
+                      <a href="{% url 'annotation:via_annotation_get' img=ann.image.image_id %}">
+                        {{ann.image.image_id}}
+                      </a>
+                    </td>
+                    <td>
+                      {{ann.annotated_on}}
+                    </td>
+                    <td>
+                      {% if ann.has_cyst %}
+                      <i class="bi bi-check-circle-fill text-success"></i>
+                      {% else %}
+                      <i class="bi bi-x-circle-fill text-danger"></i>
+                      {% endif %}
+                    </td>
+                  </tr>
+              {%endfor%}
+            </tbody>
+            <tfoot>
+              <tr>
+                <th>Image ID</th>
+                <th>Annotation Date</th>
+                <th>Cysts</th>
+              </tr>
+            </tfoot>
+          </table>
         </div>
         <!-- Tabs content -->
       </div>
@@ -165,6 +211,15 @@ Parasitoscope Annotation
                 Annotated
               </p>
               <p class="h1">{{images.annotated_count_brightfield}}</p>
+            </div>
+          </div>
+          <div class="col-6 border-start">
+            <div style="background-color:#b128b1;" class="chart-numbers">
+              <p class="h6">
+                <i class="fa fa-check-circle" aria-hidden="true"></i>
+                Positively Annotated
+              </p>
+              <p class="h1">{{images.positively_annotated_count_brightfield}}</p>
             </div>
           </div>
         </div>
@@ -192,6 +247,14 @@ Parasitoscope Annotation
             </button>
             
           </li>
+
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="positively-annotated-tab-smartphone" data-bs-toggle="tab" data-bs-target="#yes-annot-smartphone-positively" type="button"
+              role="tab" aria-controls="yes-annot-smartphone-positively" aria-selected="false">
+              Positively Annotated
+            </button>
+            
+          </li>
         </ul>
         </div>
 
@@ -201,7 +264,7 @@ Parasitoscope Annotation
             <table id="myTableNotAnnotatedSmartphone" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                 </tr>
               </thead>
               <tbody>
@@ -218,7 +281,7 @@ Parasitoscope Annotation
               </tbody>
               <tfoot>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                 </tr>
               </tfoot>
             </table>
@@ -227,7 +290,7 @@ Parasitoscope Annotation
             <table id="myTableAnnotatedSmartphone" class="display fw-bold" style="width: 100%">
               <thead>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
                   <th>Annotation Date</th>
                   <th>Cysts</th>
                 </tr>
@@ -255,7 +318,46 @@ Parasitoscope Annotation
               </tbody>
               <tfoot>
                 <tr>
-                  <th>ID</th>
+                  <th>Image ID</th>
+                  <th>Annotation Date</th>
+                  <th>Cysts</th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="tab-pane fade" id="yes-annot-smartphone-positively" role="tabpanel" aria-labelledby="positively-annnotated-smartphone-tab">
+            <table id="myTablePositivelyAnnotatedSmartphone" class="display fw-bold" style="width: 100%">
+              <thead>
+                <tr>
+                  <th>Image ID</th>
+                  <th>Annotation Date</th>
+                  <th>Cysts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%for ann in images.smartphone_positively_annotated%}
+                    <tr>
+                      <td>
+                        <a href="{% url 'annotation:via_annotation_get' img=ann.image.image_id %}">
+                          {{ann.image.image_id}}
+                        </a>
+                      </td>
+                      <td>
+                        {{ann.annotated_on}}
+                      </td>
+                      <td>
+                        {% if ann.has_cyst %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                        {% else %}
+                        <i class="bi bi-x-circle-fill text-danger"></i>
+                        {% endif %}
+                      </td>
+                    </tr>
+                {%endfor%}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Image ID</th>
                   <th>Annotation Date</th>
                   <th>Cysts</th>
                 </tr>
@@ -285,6 +387,15 @@ Parasitoscope Annotation
                 Annotated
               </p>
               <p class="h1">{{images.annotated_count_smartphone}}</p>
+            </div>
+          </div>
+          <div class="col-6 border-start">
+            <div style="background-color:#b128b1;" class="chart-numbers">
+              <p class="h6">
+                <i class="fa fa-check-circle" aria-hidden="true"></i>
+                Positively Annotated
+              </p>
+              <p class="h1">{{images.positively_annotated_count_smartphone}}</p>
             </div>
           </div>
         </div>
@@ -379,6 +490,18 @@ Parasitoscope Annotation
     color: #f2f2f2;
   }
 
+  .nav-tabs .nav-link#positively-annotated-tab-smartphone.active,
+  .nav-tabs .nav-link#positively-annotated-tab-smartphone:hover {
+    background-color: #b128b1;
+    color: #f2f2f2;
+  }
+
+  .nav-tabs .nav-link#positively-annotated-tab-brightfield.active,
+  .nav-tabs .nav-link#positively-annotated-tab-brightfield:hover {
+    background-color: #b128b1;
+    color: #f2f2f2;
+  }
+
   #myTableNotAnnotatedSmartphone {
     border: medium solid #0d6efd;
   }
@@ -391,7 +514,23 @@ Parasitoscope Annotation
     border: medium solid #da6b11;
   }
 
+  #myTablePositivelyAnnotatedSmartphone {
+    border: medium solid #b128b1;
+  }
+
+  #myTablePositivelyAnnotatedBrightfield {
+    border: medium solid #b128b1;
+  }
+
   #myTableAnnotatedSmartphone a {
+    color: #000;
+  }
+
+  #myTablePositivelyAnnotatedSmartphone a {
+    color: #000;
+  }
+
+  #myTablePositivelyAnnotatedBrightfield a {
     color: #000;
   }
 
@@ -413,19 +552,39 @@ Parasitoscope Annotation
 <script>
   console.log('{{images.annotated_labels|escapejs}}')
   $(document).ready(function () {
-    $("#myTableNotAnnotatedBrightfield").DataTable();
+    $("#myTableNotAnnotatedBrightfield").DataTable({
+      order: [0, 'asc']
+    });
   });
 
   $(document).ready(function () {
-    $("#myTableAnnotatedBrightfield").DataTable();
+    $("#myTableAnnotatedBrightfield").DataTable({
+      order: [0, 'asc']
+    });
   });
 
   $(document).ready(function () {
-    $("#myTableNotAnnotatedSmartphone").DataTable();
+    $("#myTableNotAnnotatedSmartphone").DataTable({
+      order: [0, 'asc']
+    });
   });
 
   $(document).ready(function () {
-    $("#myTableAnnotatedSmartphone").DataTable();
+    $("#myTableAnnotatedSmartphone").DataTable({
+      order: [0, 'asc']
+    });
+  });
+
+  $(document).ready(function () {
+    $("#myTablePositivelyAnnotatedSmartphone").DataTable({
+      order: [0, 'asc']
+    });
+  });
+
+  $(document).ready(function () {
+    $("#myTablePositivelyAnnotatedBrightfield").DataTable({
+      order: [0, 'asc']
+    });
   });
 </script>
 {%endblock%}
