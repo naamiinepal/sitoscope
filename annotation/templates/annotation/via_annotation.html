@@ -590,8 +590,10 @@ ul.region_shape .selected { fill:#ffffff; stroke:#ff0000; }
             {% endif %}
           </div>
           {% else %}
-          <button style="padding: 5px; margin: 5px;" onclick="no_cyst_present()">No Cysts Present</button>
+          <p>Image not annotated yet.</p>
+
           {% endif %}
+          <button style="padding: 5px; margin: 5px;" onclick="no_cyst_present()">No Cysts Present</button>
         <!-- Change End -->
 
         <button class="leftsidebar_accordion active">Region Shape</button>
